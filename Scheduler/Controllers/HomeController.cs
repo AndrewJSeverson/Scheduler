@@ -13,7 +13,6 @@ namespace Scheduler.Controllers
 
         public ActionResult Index()
         {
-            //your mom is a controller
             return View();
         }
 
