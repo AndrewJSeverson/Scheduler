@@ -28,7 +28,7 @@ namespace Scheduler.Controllers
                 {
                     name = name,
                     BurstArray = new int[randomNumber * 2 + 1],
-                    arrivalTime = random.Next(1,12);
+                    arrivalTime = random.Next(1,12)
                 };
                 for (var j = 0; j < processItem.BurstArray.Length; j++)
                 {
