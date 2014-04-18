@@ -12,6 +12,7 @@ namespace Scheduler.Classes
 
     public class Feedback : Scheduler
     {
+        //Hard coded queue times based on the assignment description
         private List<int> QueueTimes = new List<int>
             {
                 1,
@@ -19,17 +20,23 @@ namespace Scheduler.Classes
                 4
             };
 
+        //The four queues this implementation of feedback requires
         private List<List<KimProcessItem>> queues = new List<List<KimProcessItem>>
             {
                 new List<KimProcessItem>(),
                 new List<KimProcessItem>(),
                 new List<KimProcessItem>(),
-                new List<KimProcessItem>()
+                new List<KimProcessItem>()//This one is first come first serve
             };
 
+        //Return list of cpuProcesses
         private List<Process> cpuProcesses = new List<Process>();
+        //Return list of scheduled io processes
         private List<Process> ioProcesses = new List<Process>();
+
+        //The current cpu time
         private int currentTime;
+        //The current io time
         private int ioTime;
 
         public override SchedulerResult Run(List<ProcessItem> processes)
@@ -37,28 +44,26 @@ namespace Scheduler.Classes
             currentTime = 0;
             ioTime = 0;
 
+            //Sort the list by arrivial times and pick the first one to start.
             processes.Sort((x, y) => x.ArrivalTime.CompareTo(y.ArrivalTime));
             queues[0] = processes.Select(l => new KimProcessItem
-                {
-                    process = l, 
-                    burstArrayIndex = 0
-                }).ToList();
-
+                        {
+                            process = l,
+                            burstArrayIndex = 0
+                        }).ToList();
 
             while (queues[0].Count + queues[1].Count + queues[2].Count + queues[3].Count > 0)
             {
-                if (queues[0].Count > 0)
+                for (int i = 0; i < queues.Count; i++)
                 {
-                    this.scheduleProcess(0);
-                }else if (queues[1].Count > 0)
-                {
-                    this.scheduleProcess(1);
-                }else if (queues[2].Count > 0)
-                {
-                    this.scheduleProcess(2);
-                }else if (queues[3].Count > 0)
-                {
-                    this.scheduleProcess(3);
+                    if (queues[i].Count > 0)
+                    {
+                        this.scheduleProcess(i);
+                        //Resort the queue by arrivial time.  This will ensure that when processes shouldn't start they won't
+                        //As the algorithm finsihed this won't do much sorting cause the list will be sorted
+                        queues[i].Sort((x, y) => x.process.ArrivalTime.CompareTo(y.process.ArrivalTime));
+                        break;
+                    }
                 }
             }
            
@@ -74,6 +79,9 @@ namespace Scheduler.Classes
         {
             //We always take the first item because its first come first serve
             KimProcessItem nextItem = queues[queueId][0];
+            int startTime = currentTime < nextItem.process.ArrivalTime ? nextItem.process.ArrivalTime : currentTime;
+            int currentBurst = nextItem.process.BurstArray[nextItem.burstArrayIndex];
+
 
             //This means that the process has terminated at the arrival time.  
             if (nextItem.burstArrayIndex >= nextItem.process.BurstArray.Count())
@@ -81,21 +89,20 @@ namespace Scheduler.Classes
                 return;
             }
 
-            int currentBurst = nextItem.process.BurstArray[nextItem.burstArrayIndex];
-            
             //This is the last queue it is a special case the process finishes all remaing time here
-            if (queueId == 3)
+            //This is because this queue has no quantam
+            if (queueId == queues.Count - 1)
             {
-                 //Schedule the process
+                //Schedule the process
                 cpuProcesses.Add(new Process
                 {
-                    Duration = nextItem.process.BurstArray[nextItem.burstArrayIndex],
+                    Duration = currentBurst,
                     Name = nextItem.process.Name,
-                    StartTime =  currentTime < nextItem.process.ArrivalTime ? nextItem.process.ArrivalTime : currentTime
+                    StartTime =  startTime
                 });
 
                 //Increment the current time by the duration of this burst
-                currentTime += nextItem.process.BurstArray[nextItem.burstArrayIndex];
+                currentTime += currentBurst;
 
                 //Remove the item from queue 1
                 queues[queueId].RemoveAt(0);
@@ -108,7 +115,7 @@ namespace Scheduler.Classes
                 {
                     Duration = QueueTimes[queueId],
                     Name = nextItem.process.Name,
-                    StartTime = currentTime < nextItem.process.ArrivalTime ? nextItem.process.ArrivalTime : currentTime
+                    StartTime = startTime
                 });
 
                 //increment current time
@@ -131,12 +138,12 @@ namespace Scheduler.Classes
                 //Schedule the process the length is of the next burst
                 cpuProcesses.Add(new Process
                 {
-                    Duration = nextItem.process.BurstArray[nextItem.burstArrayIndex],
+                    Duration = currentBurst,
                     Name = nextItem.process.Name,
-                    StartTime = currentTime < nextItem.process.ArrivalTime ? nextItem.process.ArrivalTime : currentTime
+                    StartTime = startTime
                 });
                 //increment the current time
-                currentTime = nextItem.process.ArrivalTime + nextItem.process.BurstArray[nextItem.burstArrayIndex];
+                currentTime = nextItem.process.ArrivalTime + currentBurst;
 
                 //If the io time is less than the current time then there is nothing currently schedules so there was an idle time increment iotime
                 if (ioTime < currentTime)
@@ -155,7 +162,7 @@ namespace Scheduler.Classes
                 //Increment io time
                 ioTime += nextItem.process.BurstArray[nextItem.burstArrayIndex + 1];
 
-                //if the process was scheduled move this one to the back of this queue again
+                //increment the burst array
                 nextItem.burstArrayIndex += 2;
 
                 //Remove the item from the current queue
@@ -164,7 +171,7 @@ namespace Scheduler.Classes
                 //Set the arrivial time to right now this is the i/o time it must be after the i/o burst runs
                 nextItem.process.ArrivalTime = ioTime;
 
-                //Insert it at the end of queue 0 becau
+                //Insert it at the end of queue 0 because
                 queues[queueId].Add(nextItem);
             }
         }
