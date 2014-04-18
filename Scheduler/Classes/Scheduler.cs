@@ -5,8 +5,7 @@ namespace Scheduler.Classes
 {
     public abstract class Scheduler
     {
-        public SchedulerStats SchedulerStats { get; set; }
-
-        public abstract List<Process> Run();
+        //Generates the information needed for the ui to display the scheduler results.
+        public abstract SchedulerResult Run();
     }
 }
