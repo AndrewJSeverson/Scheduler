@@ -46,6 +46,8 @@ namespace Scheduler.Classes
         //Used to calculate average turnaround time
         private int turnAroundTime;
 
+        private Dictionary<string, int> processorsWaitTimes = new Dictionary<string, int>();
+
         public override SchedulerResult Run(List<ProcessItem> processes)
         {
             currentTime = 0;
@@ -90,9 +92,8 @@ namespace Scheduler.Classes
                 {
                     AverageTurnAroundTime = ((double)turnAroundTime) / numProcesses,
                     CpuUtilization = ((double)currentTime - cpuDownTime) / currentTime, 
-                    WaitingTime = waitingTime,
                     AverageWaitingTime = ((double)waitingTime) / numProcesses,
-                    NormailizedTurnAroundTime = 0.0
+                    ProcessWaitTimes = processorsWaitTimes
                 };
         }
 
@@ -109,6 +110,14 @@ namespace Scheduler.Classes
                 //Used for calculating cpu utilization
                 cpuDownTime += (arivialTime - currentTime);
                 startTime = arivialTime;
+                if (processorsWaitTimes.ContainsKey(nextItem.process.Name))
+                {
+                    processorsWaitTimes[nextItem.process.Name] += arivialTime - currentTime;
+                }
+                else
+                {
+                    processorsWaitTimes.Add(nextItem.process.Name, arivialTime - currentTime);
+                }
             }
             else
             {
