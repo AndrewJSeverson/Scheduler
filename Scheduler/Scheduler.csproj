@@ -131,7 +131,6 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Models\KodyProcess.cs" />
     <Compile Include="Models\Process.cs" />
     <Compile Include="Models\ProcessItem.cs" />
     <Compile Include="Models\SchedulerStats.cs" />
