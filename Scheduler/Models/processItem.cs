@@ -5,10 +5,10 @@ using System.Web;
 
 namespace Scheduler.Models
 {
-    public class processItem
+    public class ProcessItem
     {
-        public string name { get; set; }
+        public string Name { get; set; }
         public int[] BurstArray { get; set; }
-        public int arrivalTime { get; set; }
+        public int ArrivalTime { get; set; }
     }
 }

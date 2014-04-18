@@ -16,19 +16,19 @@ namespace Scheduler.Controllers
         {
             return View();
         }
-        public static List<processItem> getProcessData(int numProc)
+        public static List<ProcessItem> getProcessData(int numProc)
         {
-            var temp = new List<processItem>();
+            var temp = new List<ProcessItem>();
             for (var i = 0; i < numProc; i++)
             {
                 var name = "P" + (i+1);
                 var random = new Random();
                 var randomNumber = random.Next(1, 4);
-                var processItem = new processItem
+                var processItem = new ProcessItem
                 {
-                    name = name,
+                    Name = name,
                     BurstArray = new int[randomNumber * 2 + 1],
-                    arrivalTime = random.Next(1,12)
+                    ArrivalTime = random.Next(1,12)
                 };
                 for (var j = 0; j < processItem.BurstArray.Length; j++)
                 {

@@ -11,12 +11,12 @@ namespace Scheduler.Classes
     /// </summary>
     public class SJFNonPreemtive
     {
-        private readonly List<processItem> _processes;
+        private readonly List<ProcessItem> _processes;
 
-        public SJFNonPreemtive(List<processItem> processList)
+        public SJFNonPreemtive(List<ProcessItem> processList)
         {
             //Sort provided process list by arrival time and add it to queue
-            processList.Sort((x, y) => x.arrivalTime.CompareTo(y.arrivalTime));
+            processList.Sort((x, y) => x.ArrivalTime.CompareTo(y.ArrivalTime));
             _processes = processList;
         }
 
@@ -34,9 +34,9 @@ namespace Scheduler.Classes
             }
 
             //Add first process to list of current processes, since we have them ordered by arrival time
-            List<processItem> currentProcesses = new List<processItem> {_processes.First()};
+            List<ProcessItem> currentProcesses = new List<ProcessItem> {_processes.First()};
             int currentTime, cpuTime, ioTime;
-            currentTime = cpuTime = ioTime = _processes.First().arrivalTime;
+            currentTime = cpuTime = ioTime = _processes.First().ArrivalTime;
             _processes.RemoveAt(0);
 
             while (currentProcesses.Count > 0)
@@ -44,7 +44,7 @@ namespace Scheduler.Classes
                 //Check if any other processes have arrived, if so add them to currentProcesses
                 for(int i=0; i < _processes.Count; i++)
                 {
-                    if (_processes[i].arrivalTime <= currentTime)
+                    if (_processes[i].ArrivalTime <= currentTime)
                     {
                         currentProcesses.Add(_processes[i]);
                         _processes.RemoveAt(i);
@@ -62,7 +62,7 @@ namespace Scheduler.Classes
                         availableCPUs.Add(
                             new KodyProcess
                             {
-                                Name = currentProcesses[i].name,
+                                Name = currentProcesses[i].Name,
                                 StartTime = cpuTime,
                                 Duration = currentProcesses[i].BurstArray[pos]
                             }
@@ -74,7 +74,7 @@ namespace Scheduler.Classes
                         availableIOs.Add(
                             new KodyProcess
                             {
-                                Name = currentProcesses[i].name,
+                                Name = currentProcesses[i].Name,
                                 StartTime = ioTime,
                                 Duration = currentProcesses[i].BurstArray[pos]
                             }

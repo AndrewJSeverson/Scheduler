@@ -10,8 +10,5 @@ namespace Scheduler.Classes
 
         //Statistics about the CPU using a given scheduling method
         public SchedulerStats SchedulerStats { get; set; }
-
-        //List of the orignial process information
-        public List<processItem> OriginalProcesses { get; set; } 
     }
 }
