@@ -1,16 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using Scheduler.Models;
+﻿
+
+using System;
 
 namespace Scheduler.Classes
 {
     public class Feedback : Scheduler
     {
-        public override List<Process> Run()
+        public override SchedulerResult Run()
         {
-            
+            throw new NotImplementedException();
         }
     }
 }

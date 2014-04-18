@@ -125,7 +125,7 @@
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Classes\Feedback.cs" />
     <Compile Include="Classes\Scheduler.cs" />
-    <Compile Include="Classes\SchedulerResult.cs" />
+    <Compile Include="Models\SchedulerResult.cs" />
     <Compile Include="Classes\SJFNonPreemtive.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Global.asax.cs">
