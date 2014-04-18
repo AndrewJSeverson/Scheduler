@@ -39,10 +39,19 @@ namespace Scheduler.Classes
         //The current io time
         private int ioTime;
 
+        //Used to calculate cpu utilization
+        private int cpuDownTime;
+        //Used to calculate averate wait time
+        private int waitingTime;
+        //Used to calculate average turnaround time
+        private int turnAroundTime;
+
         public override SchedulerResult Run(List<ProcessItem> processes)
         {
             currentTime = 0;
             ioTime = 0;
+            cpuDownTime = 0;
+            waitingTime = 0;
 
             //Sort the list by arrivial times and pick the first one to start.
             processes.Sort((x, y) => x.ArrivalTime.CompareTo(y.ArrivalTime));
@@ -58,7 +67,7 @@ namespace Scheduler.Classes
                 {
                     if (queues[i].Count > 0)
                     {
-                        this.scheduleProcess(i);
+                        this.scheduleProcess(i, processes);
                         //Resort the queue by arrivial time.  This will ensure that when processes shouldn't start they won't
                         //As the algorithm finsihed this won't do much sorting cause the list will be sorted
                         queues[i].Sort((x, y) => x.process.ArrivalTime.CompareTo(y.process.ArrivalTime));
@@ -71,21 +80,50 @@ namespace Scheduler.Classes
                 {
                     CpuProcesses = cpuProcesses, 
                     IoProcesses = ioProcesses, 
-                    SchedulerStats = null
+                    SchedulerStats = calculateStats(processes.Count)
                 };
         }
 
-        private void scheduleProcess(int queueId)
+        private SchedulerStats calculateStats(int numProcesses)
+        {
+            return new SchedulerStats
+                {
+                    AverageTurnAroundTime = ((double)turnAroundTime) / numProcesses,
+                    CpuUtilization = ((double)currentTime - cpuDownTime) / currentTime, 
+                    WaitingTime = waitingTime,
+                    AverageWaitingTime = ((double)waitingTime) / numProcesses,
+                    NormailizedTurnAroundTime = 0.0
+                };
+        }
+
+        private void scheduleProcess(int queueId, List<ProcessItem> processItems)
         {
             //We always take the first item because its first come first serve
             KimProcessItem nextItem = queues[queueId][0];
-            int startTime = currentTime < nextItem.process.ArrivalTime ? nextItem.process.ArrivalTime : currentTime;
-            int currentBurst = nextItem.process.BurstArray[nextItem.burstArrayIndex];
+            int arivialTime = nextItem.process.ArrivalTime;
+            int startTime = currentTime;
+            int nextIdx = nextItem.burstArrayIndex;
+
+            if (currentTime < arivialTime)
+            {
+                //Used for calculating cpu utilization
+                cpuDownTime += (arivialTime - currentTime);
+                startTime = arivialTime;
+            }
+            else
+            {
+                //Used to calculates avg wait times
+                waitingTime += (currentTime - arivialTime);
+            }
+
+            int currentBurst = nextItem.process.BurstArray[nextIdx];
 
 
             //This means that the process has terminated at the arrival time.  
-            if (nextItem.burstArrayIndex >= nextItem.process.BurstArray.Count())
+            if (nextIdx >= nextItem.process.BurstArray.Count())
             {
+                //find out when the process started by searching the original list and calculate the turn around time.
+                turnAroundTime += (nextItem.process.ArrivalTime - processItems.First(p => p.Name.Equals(nextItem.process.Name)).ArrivalTime);
                 return;
             }
 
@@ -122,7 +160,7 @@ namespace Scheduler.Classes
                 currentTime +=  QueueTimes[queueId];
 
                 //Change the remaing burst time.
-                nextItem.process.BurstArray[nextItem.burstArrayIndex] -= QueueTimes[queueId];
+                nextItem.process.BurstArray[nextIdx] -= QueueTimes[queueId];
 
                 //Set the arrival time to right now
                 nextItem.process.ArrivalTime = currentTime;
@@ -154,13 +192,13 @@ namespace Scheduler.Classes
                 //Schedule the I/O Process
                 ioProcesses.Add(new Process
                 {
-                    Duration = nextItem.process.BurstArray[nextItem.burstArrayIndex + 1],
+                    Duration = nextItem.process.BurstArray[nextIdx + 1],
                     Name = nextItem.process.Name,
                     StartTime = ioTime
                 });
 
                 //Increment io time
-                ioTime += nextItem.process.BurstArray[nextItem.burstArrayIndex + 1];
+                ioTime += nextItem.process.BurstArray[nextIdx + 1];
 
                 //increment the burst array
                 nextItem.burstArrayIndex += 2;
