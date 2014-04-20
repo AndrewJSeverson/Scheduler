@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using Scheduler.Classes;
 using Scheduler.Models;
 
 namespace Scheduler.Controllers
@@ -14,7 +15,15 @@ namespace Scheduler.Controllers
 
         public ActionResult Index()
         {
-            return View();
+            Feedback f = new Feedback();
+            //SJFNonPreemtive s = new SJFNonPreemtive();
+            HomeModel model = new HomeModel
+                {
+                    Feedback = f.Run(getProcessData(3)),
+                    //SRT = s.Run(getProcessData(3))
+                };
+            
+            return View(model);
         }
         public static List<ProcessItem> getProcessData(int numProc)
         {
