@@ -10,5 +10,6 @@ namespace Scheduler.Models
         public string Name { get; set; }
         public int StartTime { get; set; }
         public int Duration { get; set; }
+        public int ProcessIndex { get; set; }
     }
 }
