@@ -1,0 +1,45 @@
+﻿.GanttContainer{
+    border:2px solid;
+    border-radius:25px;
+    padding-right:10px;
+}
+.P1
+{
+    display: inline-block; 
+    height:25px;
+    background-color:blue;
+}
+
+.P2
+{
+    display: inline-block; 
+    height:25px;
+    background-color:red;
+}
+
+.P3
+{
+    display: inline-block; 
+    height:25px;
+    background-color:green;
+}
+
+.P4
+{
+    display: inline-block; 
+    height:25px;
+    background-color:yellow;
+}
+
+.P5
+{
+    display: inline-block; 
+    height:25px;
+    background-color:purple;
+}
+
+.Break{
+    display: inline-block; 
+    height:25px;
+    background-color:grey;
+}
