@@ -1,4 +1,8 @@
-﻿.GanttContainer{
+﻿.hidden {
+    display: none;
+}
+
+.GanttContainer{
     border:2px solid;
     border-radius:25px;
     padding-right:10px;
@@ -7,7 +11,8 @@
 {
     display: inline-block; 
     height:25px;
-    background-color:blue;
+    background-color:lightblue;
+    text-align: center;
 }
 
 .P2
@@ -15,6 +20,7 @@
     display: inline-block; 
     height:25px;
     background-color:red;
+    text-align: center;
 }
 
 .P3
@@ -22,6 +28,7 @@
     display: inline-block; 
     height:25px;
     background-color:green;
+    text-align: center;
 }
 
 .P4
@@ -29,6 +36,7 @@
     display: inline-block; 
     height:25px;
     background-color:yellow;
+    text-align: center;
 }
 
 .P5
@@ -36,10 +44,17 @@
     display: inline-block; 
     height:25px;
     background-color:purple;
+    text-align: center;
 }
 
 .Break{
     display: inline-block; 
     height:25px;
     background-color:grey;
+    text-align: center;
+}
+
+#FeedbackOpenClose, #RROpenClose, #STROpenClose, #SPNOpenClose, #FCFSOpenClose
+{
+    cursor: pointer;
 }

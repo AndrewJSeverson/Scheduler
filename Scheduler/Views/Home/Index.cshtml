@@ -9,52 +9,284 @@
     </tr>
 </table>
 
-<h1>Feedback Algorithm</h1>
+
+<!--
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
+                                    FEEDBACK 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
+-->
+    <h1 id="FeedbackOpenClose">Feedback Algorithm</h1>
 <hr/>
-<div class="GanttContainer">  
-    @for (var i = 0; i < Model.Feedback.CpuProcesses.Count; i++)
-    {
-        if (i == 0)
+    <div id="FeedbackContainer">
+        <h3>CPU</h3>  
+        <div class="GanttContainer">
+            @for (var i = 0; i < Model.Feedback.CpuProcesses.Count; i++)
+            {
+                if (i == 0)
+                {
+                    <span style="width:@(Model.Feedback.CpuProcesses[i].Duration*10)px;" class="@Model.Feedback.CpuProcesses[i].Name">@Model.Feedback.CpuProcesses[i].Duration</span>
+                }
+                else if (Model.Feedback.CpuProcesses[i].StartTime > (Model.Feedback.CpuProcesses[i - 1].StartTime + Model.Feedback.CpuProcesses[i].Duration))
+                {
+                    <span style="width:@(((Model.Feedback.CpuProcesses[i].StartTime)-(Model.Feedback.CpuProcesses[i-1].StartTime + Model.Feedback.CpuProcesses[i].Duration))*10)px;" class="Break">@Model.Feedback.CpuProcesses[i].Duration</span>
+                }
+                else
+                {
+                    <span style="width:@(Model.Feedback.CpuProcesses[i].Duration*10)px;" class="@Model.Feedback.CpuProcesses[i].Name">@Model.Feedback.CpuProcesses[i].Duration</span>
+                }
+            }
+        </div>
+        <h3>I/O</h3>
+        <div class="GanttContainer">
+            @for (var i = 0; i < Model.Feedback.IoProcesses.Count; i++)
+            {
+                if (i == 0)
+                {
+                    <span style="width:@(Model.Feedback.IoProcesses[i].Duration*10)px;" class="@Model.Feedback.IoProcesses[i].Name">@Model.Feedback.IoProcesses[i].Duration</span>
+                }
+                else if (Model.Feedback.IoProcesses[i].StartTime > (Model.Feedback.IoProcesses[i - 1].StartTime + Model.Feedback.IoProcesses[i].Duration))
+                {
+                    <span style="width:@(((Model.Feedback.IoProcesses[i].StartTime)-(Model.Feedback.IoProcesses[i-1].StartTime + Model.Feedback.IoProcesses[i].Duration))*10)px;" class="Break">@Model.Feedback.IoProcesses[i].Duration</span>
+                }
+                else
+                {
+                    <span style="width:@(Model.Feedback.IoProcesses[i].Duration*10)px;" class="@Model.Feedback.IoProcesses[i].Name">@Model.Feedback.IoProcesses[i].Duration</span>
+                }
+            }
+        </div>
+        <h3>Stats</h3>
+        <table>
+            <tr>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td></td>
+            </tr>
+        </table>
+    </div>
+
+
+<!--
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
+                                    FCFS 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
+-->
+
+<h1 id="FCFSOpenClose">First Come First Serve (FCFS) Algorithm</h1>
+<hr/>
+    <div id="FCFSContainer" class="hidden">
+            <h3>CPU</h3>  
+            <div class="GanttContainer">
+                @for (var i = 0; i < Model.Feedback.CpuProcesses.Count; i++)
+                {
+                    if (i == 0)
+                    {
+                        <span style="width:@(Model.Feedback.CpuProcesses[i].Duration*10)px;" class="@Model.Feedback.CpuProcesses[i].Name">@Model.Feedback.CpuProcesses[i].Duration</span>
+                    }
+                    else if (Model.Feedback.CpuProcesses[i].StartTime > (Model.Feedback.CpuProcesses[i - 1].StartTime + Model.Feedback.CpuProcesses[i].Duration))
+                    {
+                        <span style="width:@(((Model.Feedback.CpuProcesses[i].StartTime)-(Model.Feedback.CpuProcesses[i-1].StartTime + Model.Feedback.CpuProcesses[i].Duration))*10)px;" class="Break">@Model.Feedback.CpuProcesses[i].Duration</span>
+                    }
+                    else
+                    {
+                        <span style="width:@(Model.Feedback.CpuProcesses[i].Duration*10)px;" class="@Model.Feedback.CpuProcesses[i].Name">@Model.Feedback.CpuProcesses[i].Duration</span>
+                    }
+                }
+            </div>
+            <h3>I/O</h3>
+            <div class="GanttContainer">
+                @for (var i = 0; i < Model.Feedback.IoProcesses.Count; i++)
+                {
+                    if (i == 0)
+                    {
+                        <span style="width:@(Model.Feedback.IoProcesses[i].Duration*10)px;" class="@Model.Feedback.IoProcesses[i].Name">@Model.Feedback.IoProcesses[i].Duration</span>
+                    }
+                    else if (Model.Feedback.IoProcesses[i].StartTime > (Model.Feedback.IoProcesses[i - 1].StartTime + Model.Feedback.IoProcesses[i].Duration))
+                    {
+                        <span style="width:@(((Model.Feedback.IoProcesses[i].StartTime)-(Model.Feedback.IoProcesses[i-1].StartTime + Model.Feedback.IoProcesses[i].Duration))*10)px;" class="Break">@Model.Feedback.IoProcesses[i].Duration</span>
+                    }
+                    else
+                    {
+                        <span style="width:@(Model.Feedback.IoProcesses[i].Duration*10)px;" class="@Model.Feedback.IoProcesses[i].Name">@Model.Feedback.IoProcesses[i].Duration</span>
+                    }
+                }
+            </div>
+    </div>
+
+
+<!--
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
+                                    Shortest Process Next 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
+-->
+
+<h1 id="SPNOpenClose">Shortes Process Next (non-preemptive) Algorithm</h1>
+<hr/>
+
+<div id="SPNContainer" class="hidden">
+    <h3>CPU</h3>  
+    <div class="GanttContainer">
+        @for (var i = 0; i < Model.Feedback.CpuProcesses.Count; i++)
         {
-            <span style="width:@(Model.Feedback.CpuProcesses[i].Duration*10)px;" class="@Model.Feedback.CpuProcesses[i].Name">@Model.Feedback.CpuProcesses[i].Duration</span>
+            if (i == 0)
+            {
+                <span style="width:@(Model.Feedback.CpuProcesses[i].Duration*10)px;" class="@Model.Feedback.CpuProcesses[i].Name">@Model.Feedback.CpuProcesses[i].Duration</span>
+            }
+            else if (Model.Feedback.CpuProcesses[i].StartTime > (Model.Feedback.CpuProcesses[i - 1].StartTime + Model.Feedback.CpuProcesses[i].Duration))
+            {
+                <span style="width:@(((Model.Feedback.CpuProcesses[i].StartTime)-(Model.Feedback.CpuProcesses[i-1].StartTime + Model.Feedback.CpuProcesses[i].Duration))*10)px;" class="Break">@Model.Feedback.CpuProcesses[i].Duration</span>
+            }
+            else
+            {
+                <span style="width:@(Model.Feedback.CpuProcesses[i].Duration*10)px;" class="@Model.Feedback.CpuProcesses[i].Name">@Model.Feedback.CpuProcesses[i].Duration</span>
+            }
         }
-        else if (Model.Feedback.CpuProcesses[i].StartTime > (Model.Feedback.CpuProcesses[i - 1].StartTime + Model.Feedback.CpuProcesses[i].Duration))
+    </div>
+    <h3>I/O</h3>
+    <div class="GanttContainer">
+        @for (var i = 0; i < Model.Feedback.IoProcesses.Count; i++)
         {
-            <span style="width:@(((Model.Feedback.CpuProcesses[i].StartTime)-(Model.Feedback.CpuProcesses[i-1].StartTime + Model.Feedback.CpuProcesses[i].Duration))*10)px;" class="Break">@Model.Feedback.CpuProcesses[i].Duration</span>
+            if (i == 0)
+            {
+                <span style="width:@(Model.Feedback.IoProcesses[i].Duration*10)px;" class="@Model.Feedback.IoProcesses[i].Name">@Model.Feedback.IoProcesses[i].Duration</span>
+            }
+            else if (Model.Feedback.IoProcesses[i].StartTime > (Model.Feedback.IoProcesses[i - 1].StartTime + Model.Feedback.IoProcesses[i].Duration))
+            {
+                <span style="width:@(((Model.Feedback.IoProcesses[i].StartTime)-(Model.Feedback.IoProcesses[i-1].StartTime + Model.Feedback.IoProcesses[i].Duration))*10)px;" class="Break">@Model.Feedback.IoProcesses[i].Duration</span>
+            }
+            else
+            {
+                <span style="width:@(Model.Feedback.IoProcesses[i].Duration*10)px;" class="@Model.Feedback.IoProcesses[i].Name">@Model.Feedback.IoProcesses[i].Duration</span>
+            }
         }
-        else
-        {
-            <span style="width:@(Model.Feedback.CpuProcesses[i].Duration*10)px;" class="@Model.Feedback.CpuProcesses[i].Name">@Model.Feedback.CpuProcesses[i].Duration</span>
-        }
-        
-    }
+    </div>
 </div>
 
-<h1>First Come First Serve (FCFS) Algorithm</h1>
-<hr/>
 
-<h1>Shortes Process Next (non-preemptive) Algorithm</h1>
-<hr/>
-@*
-@for (var i = 0; i < Model.SRT.CpuProcesses.Count; i++)
-    {
-        if (i == 0)
-        {
-            <span style="width:@(Model.SRT.CpuProcesses[i].Duration*10)px;" class="@Model.SRT.CpuProcesses[i].Name">@Model.SRT.CpuProcesses[i].Duration</span>
-        }
-        else if (Model.SRT.CpuProcesses[i].StartTime > (Model.SRT.CpuProcesses[i - 1].StartTime + Model.SRT.CpuProcesses[i].Duration))
-        {
-            <span style="width:@(((Model.SRT.CpuProcesses[i].StartTime)-(Model.SRT.CpuProcesses[i-1].StartTime + Model.SRT.CpuProcesses[i].Duration))*10)px;" class="Break">@Model.SRT.CpuProcesses[i].Duration</span>
-        }
-        else
-        {
-            <span style="width:@(Model.SRT.CpuProcesses[i].Duration*10)px;" class="@Model.SRT.CpuProcesses[i].Name">@Model.SRT.CpuProcesses[i].Duration</span>
-        }
-        
-    }
-*@
-<h1>Shortest Time Remaining (preemptive) Algorithm</h1>
-<hr/>
+<!--
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
+                                    Shortes Time Remaining 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
+-->
 
-<h1>Round Robin Algorithm</h1>
+<h1 id="STROpenClose">Shortest Time Remaining (preemptive) Algorithm</h1>
 <hr/>
+<div id="STRContainer" class="hidden">
+        <h3>CPU</h3>  
+        <div class="GanttContainer">
+            @for (var i = 0; i < Model.Feedback.CpuProcesses.Count; i++)
+            {
+                if (i == 0)
+                {
+                    <span style="width:@(Model.Feedback.CpuProcesses[i].Duration*10)px;" class="@Model.Feedback.CpuProcesses[i].Name">@Model.Feedback.CpuProcesses[i].Duration</span>
+                }
+                else if (Model.Feedback.CpuProcesses[i].StartTime > (Model.Feedback.CpuProcesses[i - 1].StartTime + Model.Feedback.CpuProcesses[i].Duration))
+                {
+                    <span style="width:@(((Model.Feedback.CpuProcesses[i].StartTime)-(Model.Feedback.CpuProcesses[i-1].StartTime + Model.Feedback.CpuProcesses[i].Duration))*10)px;" class="Break">@Model.Feedback.CpuProcesses[i].Duration</span>
+                }
+                else
+                {
+                    <span style="width:@(Model.Feedback.CpuProcesses[i].Duration*10)px;" class="@Model.Feedback.CpuProcesses[i].Name">@Model.Feedback.CpuProcesses[i].Duration</span>
+                }
+            }
+        </div>
+        <h3>I/O</h3>
+        <div class="GanttContainer">
+            @for (var i = 0; i < Model.Feedback.IoProcesses.Count; i++)
+            {
+                if (i == 0)
+                {
+                    <span style="width:@(Model.Feedback.IoProcesses[i].Duration*10)px;" class="@Model.Feedback.IoProcesses[i].Name">@Model.Feedback.IoProcesses[i].Duration</span>
+                }
+                else if (Model.Feedback.IoProcesses[i].StartTime > (Model.Feedback.IoProcesses[i - 1].StartTime + Model.Feedback.IoProcesses[i].Duration))
+                {
+                    <span style="width:@(((Model.Feedback.IoProcesses[i].StartTime)-(Model.Feedback.IoProcesses[i-1].StartTime + Model.Feedback.IoProcesses[i].Duration))*10)px;" class="Break">@Model.Feedback.IoProcesses[i].Duration</span>
+                }
+                else
+                {
+                    <span style="width:@(Model.Feedback.IoProcesses[i].Duration*10)px;" class="@Model.Feedback.IoProcesses[i].Name">@Model.Feedback.IoProcesses[i].Duration</span>
+                }
+            }
+        </div>
+</div>
+
+
+<!--
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
+                                    Round Robin 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
+-->
+
+<h1 id="RROpenClose">Round Robin Algorithm</h1>
+<hr/>
+<div id="RRContainer" class="hidden">
+        <h3>CPU</h3>  
+        <div class="GanttContainer">
+            @for (var i = 0; i < Model.Feedback.CpuProcesses.Count; i++)
+            {
+                if (i == 0)
+                {
+                    <span style="width:@(Model.Feedback.CpuProcesses[i].Duration*10)px;" class="@Model.Feedback.CpuProcesses[i].Name">@Model.Feedback.CpuProcesses[i].Duration</span>
+                }
+                else if (Model.Feedback.CpuProcesses[i].StartTime > (Model.Feedback.CpuProcesses[i - 1].StartTime + Model.Feedback.CpuProcesses[i].Duration))
+                {
+                    <span style="width:@(((Model.Feedback.CpuProcesses[i].StartTime)-(Model.Feedback.CpuProcesses[i-1].StartTime + Model.Feedback.CpuProcesses[i].Duration))*10)px;" class="Break">@Model.Feedback.CpuProcesses[i].Duration</span>
+                }
+                else
+                {
+                    <span style="width:@(Model.Feedback.CpuProcesses[i].Duration*10)px;" class="@Model.Feedback.CpuProcesses[i].Name">@Model.Feedback.CpuProcesses[i].Duration</span>
+                }
+            }
+        </div>
+        <h3>I/O</h3>
+        <div class="GanttContainer">
+            @for (var i = 0; i < Model.Feedback.IoProcesses.Count; i++)
+            {
+                if (i == 0)
+                {
+                    <span style="width:@(Model.Feedback.IoProcesses[i].Duration*10)px;" class="@Model.Feedback.IoProcesses[i].Name">@Model.Feedback.IoProcesses[i].Duration</span>
+                }
+                else if (Model.Feedback.IoProcesses[i].StartTime > (Model.Feedback.IoProcesses[i - 1].StartTime + Model.Feedback.IoProcesses[i].Duration))
+                {
+                    <span style="width:@(((Model.Feedback.IoProcesses[i].StartTime)-(Model.Feedback.IoProcesses[i-1].StartTime + Model.Feedback.IoProcesses[i].Duration))*10)px;" class="Break">@Model.Feedback.IoProcesses[i].Duration</span>
+                }
+                else
+                {
+                    <span style="width:@(Model.Feedback.IoProcesses[i].Duration*10)px;" class="@Model.Feedback.IoProcesses[i].Name">@Model.Feedback.IoProcesses[i].Duration</span>
+                }
+            }
+        </div>
+</div>
+
