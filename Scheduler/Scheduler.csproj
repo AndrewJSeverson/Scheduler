@@ -127,7 +127,7 @@
     <Compile Include="Classes\Scheduler.cs" />
     <Compile Include="Models\HomeModel.cs" />
     <Compile Include="Models\SchedulerResult.cs" />
-    <Compile Include="Classes\SJFNonPreemtive.cs" />
+    <Compile Include="Classes\SJFNonPreemptive.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
