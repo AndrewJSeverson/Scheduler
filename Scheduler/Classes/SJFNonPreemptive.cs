@@ -21,7 +21,7 @@ namespace Scheduler.Classes
             var ioProcesses = new List<Process>();
 
             //Tracks various data about processes
-            var processData = new int[processes.Count, 3];
+            var processData = new int[processes.Count, 4];
             for (int i = 0; i < processData.Length; i++)
             {
                 processData[i, 0] = 0; //Current index in im on in a process
@@ -129,7 +129,6 @@ namespace Scheduler.Classes
                     ioWaiting = true;
                 }
                 
-
                 if (cpuWaiting && ioWaiting)//TODO need to commit
                 {
                     //TODO currently unhandled..and it's a rare case. I presume I would have to simply "reset" all the variables to the next closest IO/CPU
@@ -146,11 +145,36 @@ namespace Scheduler.Classes
                 currentTime = cpuTime > ioTime ? ioTime : cpuTime; 
             }
 
+
+            /*
+             CALCULATE STATS AND RETURN 'EM
+            */
+
+            //Grab processes wait times from my process data and put it into the dictionary....Kim already had this method setup, so bleh
+            var processorsWaitTimes = new Dictionary<string, int>();
+            for (int i = 0; i < processData.Length; i++)
+            {
+                processorsWaitTimes.Add(processes[i].Name, processData[i, 2]);
+            }
+
             return new SchedulerResult
             {
                 CpuProcesses = cpuProcesses,
-                IoProcesses = ioProcesses
-                //SchedulerStats = calculateStats(processes.Count)
+                IoProcesses = ioProcesses,
+                SchedulerStats = calculateStats(processes.Count, waitingTime, processorsWaitTimes)
+            };
+        }
+
+        private SchedulerStats calculateStats(int numProcesses, int waitingTime, Dictionary<string, int> processorsWaitTimes)
+        {
+            
+
+            return new SchedulerStats
+            {
+                AverageTurnAroundTime = 0.0,//((double)turnAroundTime) / numProcesses,
+                CpuUtilization = 0.0,//((double)currentTime - cpuDownTime) / currentTime,
+                AverageWaitingTime = ((double)waitingTime) / numProcesses,
+                ProcessWaitTimes = processorsWaitTimes
             };
         }
     }
