@@ -37,7 +37,7 @@ namespace Scheduler.Classes
         //The current cpu time
         private int currentTime;
         //The current io time
-        private int ioTime;
+        private int ioTime; //TODO sorry kim
 
         //Used to calculate cpu utilization
         private int cpuDownTime;
