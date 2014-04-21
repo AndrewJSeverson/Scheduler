@@ -123,6 +123,8 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Classes\RoundRobin.cs" />
+    <Compile Include="Classes\FCFS.cs" />
     <Compile Include="Classes\Feedback.cs" />
     <Compile Include="Classes\Scheduler.cs" />
     <Compile Include="Models\HomeModel.cs" />
