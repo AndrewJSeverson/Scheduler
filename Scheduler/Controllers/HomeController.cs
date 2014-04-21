@@ -16,11 +16,13 @@ namespace Scheduler.Controllers
         public ActionResult Index()
         {
             Feedback f = new Feedback();
-            //SJFNonPreemtive s = new SJFNonPreemtive();
+            SJFNonPreemtive s = new SJFNonPreemtive();
+            //RoundRobin rr = new RoundRobin();
             HomeModel model = new HomeModel
                 {
                     Feedback = f.Run(getProcessData(3)),
-                    //SRT = s.Run(getProcessData(3))
+                    SRT = s.Run(getProcessData(3))
+                    //RR = rr.Run(getProcessData(3))
                 };
             
             return View(model);

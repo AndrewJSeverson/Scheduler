@@ -22,7 +22,7 @@ namespace Scheduler.Classes
 
             //Tracks various data about processes
             var processData = new int[processes.Count, 4];
-            for (int i = 0; i < processData.Length; i++)
+            for (int i = 0; i < processes.Count; i++)
             {
                 processData[i, 0] = 0; //Current index in im on in a process
                 processData[i, 1] = processes[i].BurstArray.Length-1; //Max index of a process
