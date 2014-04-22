@@ -19,18 +19,19 @@ namespace Scheduler.Controllers
             Feedback f = new Feedback();
             SJFNonPreemtive s = new SJFNonPreemtive();
             RoundRobin rr = new RoundRobin();
+            //Preemptive p = new Preemptive(); (this doesn't seem to work?
             FCFS fcfs = new FCFS();
             List<ProcessItem> processItems = getProcessData(numProcess);
             HomeModel model = new HomeModel
-            {
+                {
                 NumProcess = numProcess,
                 ProcessItems = processItems,
                 Feedback = f.Run(processItems),
-                //SRT = s.Run(processItems)
+                //SRT = p.Run(processItems)
                 //RR = rr.Run(processItems)
                 //FCFS = fcfs.Run(processItems)
-            };
-
+                };
+            
             return View(model);
         }
         public static List<ProcessItem> getProcessData(int numProc)
@@ -38,7 +39,7 @@ namespace Scheduler.Controllers
             var temp = new List<ProcessItem>();
             for (var i = 0; i < numProc; i++)
             {
-                var name = "P" + (i + 1);
+                var name = "P" + (i+1);
                 var random = new Random();
                 var randomNumber = random.Next(1, 4);
                 var processItem = new ProcessItem
