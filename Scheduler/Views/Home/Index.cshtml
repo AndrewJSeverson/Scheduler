@@ -1,13 +1,43 @@
 ﻿@{
     ViewBag.Title = "Index";
+    var cellWidth = 10;
 }
 @model Scheduler.Models.HomeModel 
 
-<table>
-    <tr>
-        
-    </tr>
-</table>
+
+<div class="center">
+    <b><span>Number of processes: </span></b><input type="text" id="NumProcesses" size="3"/>
+    <button id="NumProcessSubmit">Submit</button>
+</div>
+<hr/>
+<br/>
+
+<div class="center">
+    <span>Number of Processes: </span><b>@Model.NumProcess</b>
+    <table id="CPUTimeTable">
+            <thead>
+                <th>Process</th>
+                <th>Arrival Time</th>
+                @for (var i = 0; i < Model.ProcessItems[0].BurstArray.Count(); i ++ )
+                {
+                    <th>CPU @(i+1)</th>
+                }
+            </thead>
+            <tbody>
+                @for (var i = 0; i < Model.ProcessItems.Count; i ++ )
+                {
+                    <tr>
+                        <td>P @(i+1)</td>
+                        <td>@Model.ProcessItems[i].ArrivalTime</td>
+                        @for (var j = 0; j < Model.ProcessItems[i].BurstArray.Count(); j++){
+                            <td>@Model.ProcessItems[i].BurstArray[j]</td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+</div>
+
 
 
 <!--
@@ -26,15 +56,19 @@
             {
                 if (i == 0)
                 {
-                    <span style="width:@(Model.Feedback.CpuProcesses[i].Duration*10)px;" class="@Model.Feedback.CpuProcesses[i].Name">@Model.Feedback.CpuProcesses[i].Duration</span>
+                    if (Model.Feedback.CpuProcesses[i].StartTime != 0)
+                    {
+                        <span style="width:@(Model.Feedback.CpuProcesses[i].StartTime*cellWidth)px;" class="Break">@Model.Feedback.CpuProcesses[i].StartTime</span>
+                    }
+                    <span style="width:@(Model.Feedback.CpuProcesses[i].Duration*cellWidth)px;" class="@Model.Feedback.CpuProcesses[i].Name">@Model.Feedback.CpuProcesses[i].Duration</span>
                 }
                 else if (Model.Feedback.CpuProcesses[i].StartTime > (Model.Feedback.CpuProcesses[i - 1].StartTime + Model.Feedback.CpuProcesses[i].Duration))
                 {
-                    <span style="width:@(((Model.Feedback.CpuProcesses[i].StartTime)-(Model.Feedback.CpuProcesses[i-1].StartTime + Model.Feedback.CpuProcesses[i].Duration))*10)px;" class="Break">@Model.Feedback.CpuProcesses[i].Duration</span>
+                    <span style="width:@(((Model.Feedback.CpuProcesses[i].StartTime)-(Model.Feedback.CpuProcesses[i-1].StartTime + Model.Feedback.CpuProcesses[i].Duration))*cellWidth)px;" class="Break">@((Model.Feedback.CpuProcesses[i].StartTime)-(Model.Feedback.CpuProcesses[i-1].StartTime + Model.Feedback.CpuProcesses[i].Duration))</span>
                 }
                 else
                 {
-                    <span style="width:@(Model.Feedback.CpuProcesses[i].Duration*10)px;" class="@Model.Feedback.CpuProcesses[i].Name">@Model.Feedback.CpuProcesses[i].Duration</span>
+                    <span style="width:@(Model.Feedback.CpuProcesses[i].Duration*cellWidth)px;" class="@Model.Feedback.CpuProcesses[i].Name">@Model.Feedback.CpuProcesses[i].Duration</span>
                 }
             }
         </div>
@@ -44,48 +78,30 @@
             {
                 if (i == 0)
                 {
-                    <span style="width:@(Model.Feedback.IoProcesses[i].Duration*10)px;" class="@Model.Feedback.IoProcesses[i].Name">@Model.Feedback.IoProcesses[i].Duration</span>
+                    <span style="width:@(Model.Feedback.IoProcesses[i].Duration*cellWidth)px;" class="@Model.Feedback.IoProcesses[i].Name">@Model.Feedback.IoProcesses[i].Duration</span>
                 }
                 else if (Model.Feedback.IoProcesses[i].StartTime > (Model.Feedback.IoProcesses[i - 1].StartTime + Model.Feedback.IoProcesses[i].Duration))
                 {
-                    <span style="width:@(((Model.Feedback.IoProcesses[i].StartTime)-(Model.Feedback.IoProcesses[i-1].StartTime + Model.Feedback.IoProcesses[i].Duration))*10)px;" class="Break">@Model.Feedback.IoProcesses[i].Duration</span>
+                    <span style="width:@(((Model.Feedback.IoProcesses[i].StartTime)-(Model.Feedback.IoProcesses[i-1].StartTime + Model.Feedback.IoProcesses[i].Duration))*cellWidth)px;" class="Break">@Model.Feedback.IoProcesses[i].Duration</span>
                 }
                 else
                 {
-                    <span style="width:@(Model.Feedback.IoProcesses[i].Duration*10)px;" class="@Model.Feedback.IoProcesses[i].Name">@Model.Feedback.IoProcesses[i].Duration</span>
+                    <span style="width:@(Model.Feedback.IoProcesses[i].Duration*cellWidth)px;" class="@Model.Feedback.IoProcesses[i].Name">@Model.Feedback.IoProcesses[i].Duration</span>
                 }
             }
         </div>
         <h3>Stats</h3>
         <table>
-            <tr>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td></td>
-                <td></td>
-            </tr>
+            <thead>
+                <th>Stat</th>
+                @for (var i = 0; i < Model.ProcessItems.Count; i ++ )
+                {
+                    <th>@(i+1)</th>
+                }
+            </thead>
+            <tbody>
+                
+            </tbody>
         </table>
     </div>
 
@@ -107,15 +123,15 @@
                 {
                     if (i == 0)
                     {
-                        <span style="width:@(Model.Feedback.CpuProcesses[i].Duration*10)px;" class="@Model.Feedback.CpuProcesses[i].Name">@Model.Feedback.CpuProcesses[i].Duration</span>
+                        <span style="width:@(Model.Feedback.CpuProcesses[i].Duration*cellWidth)px;" class="@Model.Feedback.CpuProcesses[i].Name">@Model.Feedback.CpuProcesses[i].Duration</span>
                     }
                     else if (Model.Feedback.CpuProcesses[i].StartTime > (Model.Feedback.CpuProcesses[i - 1].StartTime + Model.Feedback.CpuProcesses[i].Duration))
                     {
-                        <span style="width:@(((Model.Feedback.CpuProcesses[i].StartTime)-(Model.Feedback.CpuProcesses[i-1].StartTime + Model.Feedback.CpuProcesses[i].Duration))*10)px;" class="Break">@Model.Feedback.CpuProcesses[i].Duration</span>
+                        <span style="width:@(((Model.Feedback.CpuProcesses[i].StartTime)-(Model.Feedback.CpuProcesses[i-1].StartTime + Model.Feedback.CpuProcesses[i].Duration))*cellWidth)px;" class="Break">@Model.Feedback.CpuProcesses[i].Duration</span>
                     }
                     else
                     {
-                        <span style="width:@(Model.Feedback.CpuProcesses[i].Duration*10)px;" class="@Model.Feedback.CpuProcesses[i].Name">@Model.Feedback.CpuProcesses[i].Duration</span>
+                        <span style="width:@(Model.Feedback.CpuProcesses[i].Duration*cellWidth)px;" class="@Model.Feedback.CpuProcesses[i].Name">@Model.Feedback.CpuProcesses[i].Duration</span>
                     }
                 }
             </div>
@@ -125,15 +141,15 @@
                 {
                     if (i == 0)
                     {
-                        <span style="width:@(Model.Feedback.IoProcesses[i].Duration*10)px;" class="@Model.Feedback.IoProcesses[i].Name">@Model.Feedback.IoProcesses[i].Duration</span>
+                        <span style="width:@(Model.Feedback.IoProcesses[i].Duration*cellWidth)px;" class="@Model.Feedback.IoProcesses[i].Name">@Model.Feedback.IoProcesses[i].Duration</span>
                     }
                     else if (Model.Feedback.IoProcesses[i].StartTime > (Model.Feedback.IoProcesses[i - 1].StartTime + Model.Feedback.IoProcesses[i].Duration))
                     {
-                        <span style="width:@(((Model.Feedback.IoProcesses[i].StartTime)-(Model.Feedback.IoProcesses[i-1].StartTime + Model.Feedback.IoProcesses[i].Duration))*10)px;" class="Break">@Model.Feedback.IoProcesses[i].Duration</span>
+                        <span style="width:@(((Model.Feedback.IoProcesses[i].StartTime)-(Model.Feedback.IoProcesses[i-1].StartTime + Model.Feedback.IoProcesses[i].Duration))*cellWidth)px;" class="Break">@Model.Feedback.IoProcesses[i].Duration</span>
                     }
                     else
                     {
-                        <span style="width:@(Model.Feedback.IoProcesses[i].Duration*10)px;" class="@Model.Feedback.IoProcesses[i].Name">@Model.Feedback.IoProcesses[i].Duration</span>
+                        <span style="width:@(Model.Feedback.IoProcesses[i].Duration*cellWidth)px;" class="@Model.Feedback.IoProcesses[i].Name">@Model.Feedback.IoProcesses[i].Duration</span>
                     }
                 }
             </div>
@@ -158,15 +174,15 @@
         {
             if (i == 0)
             {
-                <span style="width:@(Model.Feedback.CpuProcesses[i].Duration*10)px;" class="@Model.Feedback.CpuProcesses[i].Name">@Model.Feedback.CpuProcesses[i].Duration</span>
+                <span style="width:@(Model.Feedback.CpuProcesses[i].Duration*cellWidth)px;" class="@Model.Feedback.CpuProcesses[i].Name">@Model.Feedback.CpuProcesses[i].Duration</span>
             }
             else if (Model.Feedback.CpuProcesses[i].StartTime > (Model.Feedback.CpuProcesses[i - 1].StartTime + Model.Feedback.CpuProcesses[i].Duration))
             {
-                <span style="width:@(((Model.Feedback.CpuProcesses[i].StartTime)-(Model.Feedback.CpuProcesses[i-1].StartTime + Model.Feedback.CpuProcesses[i].Duration))*10)px;" class="Break">@Model.Feedback.CpuProcesses[i].Duration</span>
+                <span style="width:@(((Model.Feedback.CpuProcesses[i].StartTime)-(Model.Feedback.CpuProcesses[i-1].StartTime + Model.Feedback.CpuProcesses[i].Duration))*cellWidth)px;" class="Break">@Model.Feedback.CpuProcesses[i].Duration</span>
             }
             else
             {
-                <span style="width:@(Model.Feedback.CpuProcesses[i].Duration*10)px;" class="@Model.Feedback.CpuProcesses[i].Name">@Model.Feedback.CpuProcesses[i].Duration</span>
+                <span style="width:@(Model.Feedback.CpuProcesses[i].Duration*cellWidth)px;" class="@Model.Feedback.CpuProcesses[i].Name">@Model.Feedback.CpuProcesses[i].Duration</span>
             }
         }
     </div>
@@ -176,15 +192,15 @@
         {
             if (i == 0)
             {
-                <span style="width:@(Model.Feedback.IoProcesses[i].Duration*10)px;" class="@Model.Feedback.IoProcesses[i].Name">@Model.Feedback.IoProcesses[i].Duration</span>
+                <span style="width:@(Model.Feedback.IoProcesses[i].Duration*cellWidth)px;" class="@Model.Feedback.IoProcesses[i].Name">@Model.Feedback.IoProcesses[i].Duration</span>
             }
             else if (Model.Feedback.IoProcesses[i].StartTime > (Model.Feedback.IoProcesses[i - 1].StartTime + Model.Feedback.IoProcesses[i].Duration))
             {
-                <span style="width:@(((Model.Feedback.IoProcesses[i].StartTime)-(Model.Feedback.IoProcesses[i-1].StartTime + Model.Feedback.IoProcesses[i].Duration))*10)px;" class="Break">@Model.Feedback.IoProcesses[i].Duration</span>
+                <span style="width:@(((Model.Feedback.IoProcesses[i].StartTime)-(Model.Feedback.IoProcesses[i-1].StartTime + Model.Feedback.IoProcesses[i].Duration))*cellWidth)px;" class="Break">@Model.Feedback.IoProcesses[i].Duration</span>
             }
             else
             {
-                <span style="width:@(Model.Feedback.IoProcesses[i].Duration*10)px;" class="@Model.Feedback.IoProcesses[i].Name">@Model.Feedback.IoProcesses[i].Duration</span>
+                <span style="width:@(Model.Feedback.IoProcesses[i].Duration*cellWidth)px;" class="@Model.Feedback.IoProcesses[i].Name">@Model.Feedback.IoProcesses[i].Duration</span>
             }
         }
     </div>
@@ -208,15 +224,15 @@
             {
                 if (i == 0)
                 {
-                    <span style="width:@(Model.Feedback.CpuProcesses[i].Duration*10)px;" class="@Model.Feedback.CpuProcesses[i].Name">@Model.Feedback.CpuProcesses[i].Duration</span>
+                    <span style="width:@(Model.Feedback.CpuProcesses[i].Duration*cellWidth)px;" class="@Model.Feedback.CpuProcesses[i].Name">@Model.Feedback.CpuProcesses[i].Duration</span>
                 }
                 else if (Model.Feedback.CpuProcesses[i].StartTime > (Model.Feedback.CpuProcesses[i - 1].StartTime + Model.Feedback.CpuProcesses[i].Duration))
                 {
-                    <span style="width:@(((Model.Feedback.CpuProcesses[i].StartTime)-(Model.Feedback.CpuProcesses[i-1].StartTime + Model.Feedback.CpuProcesses[i].Duration))*10)px;" class="Break">@Model.Feedback.CpuProcesses[i].Duration</span>
+                    <span style="width:@(((Model.Feedback.CpuProcesses[i].StartTime)-(Model.Feedback.CpuProcesses[i-1].StartTime + Model.Feedback.CpuProcesses[i].Duration))*cellWidth)px;" class="Break">@Model.Feedback.CpuProcesses[i].Duration</span>
                 }
                 else
                 {
-                    <span style="width:@(Model.Feedback.CpuProcesses[i].Duration*10)px;" class="@Model.Feedback.CpuProcesses[i].Name">@Model.Feedback.CpuProcesses[i].Duration</span>
+                    <span style="width:@(Model.Feedback.CpuProcesses[i].Duration*cellWidth)px;" class="@Model.Feedback.CpuProcesses[i].Name">@Model.Feedback.CpuProcesses[i].Duration</span>
                 }
             }
         </div>
@@ -226,15 +242,15 @@
             {
                 if (i == 0)
                 {
-                    <span style="width:@(Model.Feedback.IoProcesses[i].Duration*10)px;" class="@Model.Feedback.IoProcesses[i].Name">@Model.Feedback.IoProcesses[i].Duration</span>
+                    <span style="width:@(Model.Feedback.IoProcesses[i].Duration*cellWidth)px;" class="@Model.Feedback.IoProcesses[i].Name">@Model.Feedback.IoProcesses[i].Duration</span>
                 }
                 else if (Model.Feedback.IoProcesses[i].StartTime > (Model.Feedback.IoProcesses[i - 1].StartTime + Model.Feedback.IoProcesses[i].Duration))
                 {
-                    <span style="width:@(((Model.Feedback.IoProcesses[i].StartTime)-(Model.Feedback.IoProcesses[i-1].StartTime + Model.Feedback.IoProcesses[i].Duration))*10)px;" class="Break">@Model.Feedback.IoProcesses[i].Duration</span>
+                    <span style="width:@(((Model.Feedback.IoProcesses[i].StartTime)-(Model.Feedback.IoProcesses[i-1].StartTime + Model.Feedback.IoProcesses[i].Duration))*cellWidth)px;" class="Break">@Model.Feedback.IoProcesses[i].Duration</span>
                 }
                 else
                 {
-                    <span style="width:@(Model.Feedback.IoProcesses[i].Duration*10)px;" class="@Model.Feedback.IoProcesses[i].Name">@Model.Feedback.IoProcesses[i].Duration</span>
+                    <span style="width:@(Model.Feedback.IoProcesses[i].Duration*cellWidth)px;" class="@Model.Feedback.IoProcesses[i].Name">@Model.Feedback.IoProcesses[i].Duration</span>
                 }
             }
         </div>
@@ -258,15 +274,15 @@
             {
                 if (i == 0)
                 {
-                    <span style="width:@(Model.Feedback.CpuProcesses[i].Duration*10)px;" class="@Model.Feedback.CpuProcesses[i].Name">@Model.Feedback.CpuProcesses[i].Duration</span>
+                    <span style="width:@(Model.Feedback.CpuProcesses[i].Duration*cellWidth)px;" class="@Model.Feedback.CpuProcesses[i].Name">@Model.Feedback.CpuProcesses[i].Duration</span>
                 }
                 else if (Model.Feedback.CpuProcesses[i].StartTime > (Model.Feedback.CpuProcesses[i - 1].StartTime + Model.Feedback.CpuProcesses[i].Duration))
                 {
-                    <span style="width:@(((Model.Feedback.CpuProcesses[i].StartTime)-(Model.Feedback.CpuProcesses[i-1].StartTime + Model.Feedback.CpuProcesses[i].Duration))*10)px;" class="Break">@Model.Feedback.CpuProcesses[i].Duration</span>
+                    <span style="width:@(((Model.Feedback.CpuProcesses[i].StartTime)-(Model.Feedback.CpuProcesses[i-1].StartTime + Model.Feedback.CpuProcesses[i].Duration))*cellWidth)px;" class="Break">@Model.Feedback.CpuProcesses[i].Duration</span>
                 }
                 else
                 {
-                    <span style="width:@(Model.Feedback.CpuProcesses[i].Duration*10)px;" class="@Model.Feedback.CpuProcesses[i].Name">@Model.Feedback.CpuProcesses[i].Duration</span>
+                    <span style="width:@(Model.Feedback.CpuProcesses[i].Duration*cellWidth)px;" class="@Model.Feedback.CpuProcesses[i].Name">@Model.Feedback.CpuProcesses[i].Duration</span>
                 }
             }
         </div>
@@ -276,15 +292,15 @@
             {
                 if (i == 0)
                 {
-                    <span style="width:@(Model.Feedback.IoProcesses[i].Duration*10)px;" class="@Model.Feedback.IoProcesses[i].Name">@Model.Feedback.IoProcesses[i].Duration</span>
+                    <span style="width:@(Model.Feedback.IoProcesses[i].Duration*cellWidth)px;" class="@Model.Feedback.IoProcesses[i].Name">@Model.Feedback.IoProcesses[i].Duration</span>
                 }
                 else if (Model.Feedback.IoProcesses[i].StartTime > (Model.Feedback.IoProcesses[i - 1].StartTime + Model.Feedback.IoProcesses[i].Duration))
                 {
-                    <span style="width:@(((Model.Feedback.IoProcesses[i].StartTime)-(Model.Feedback.IoProcesses[i-1].StartTime + Model.Feedback.IoProcesses[i].Duration))*10)px;" class="Break">@Model.Feedback.IoProcesses[i].Duration</span>
+                    <span style="width:@(((Model.Feedback.IoProcesses[i].StartTime)-(Model.Feedback.IoProcesses[i-1].StartTime + Model.Feedback.IoProcesses[i].Duration))*cellWidth)px;" class="Break">@Model.Feedback.IoProcesses[i].Duration</span>
                 }
                 else
                 {
-                    <span style="width:@(Model.Feedback.IoProcesses[i].Duration*10)px;" class="@Model.Feedback.IoProcesses[i].Name">@Model.Feedback.IoProcesses[i].Duration</span>
+                    <span style="width:@(Model.Feedback.IoProcesses[i].Duration*cellWidth)px;" class="@Model.Feedback.IoProcesses[i].Name">@Model.Feedback.IoProcesses[i].Duration</span>
                 }
             }
         </div>

@@ -13,5 +13,7 @@ namespace Scheduler.Models
         public SchedulerResult FCFS { get; set; }
         public SchedulerResult SPN { get; set; }
         public SchedulerResult SRT { get; set; }
+        public int NumProcess { get; set; }
+        public List<ProcessItem> ProcessItems { get; set; }
     }
 }
