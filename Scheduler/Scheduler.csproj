@@ -130,7 +130,6 @@
     <Compile Include="Classes\FCFS.cs" />
     <Compile Include="Classes\Feedback.cs" />
     <Compile Include="Classes\Scheduler.cs" />
-    <Compile Include="Controllers\Preemptive.cs" />
     <Compile Include="Models\HomeModel.cs" />
     <Compile Include="Models\SchedulerResult.cs" />
     <Compile Include="Classes\SJFNonPreemptive.cs" />

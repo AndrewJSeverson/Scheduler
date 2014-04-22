@@ -41,6 +41,7 @@ namespace Scheduler.Controllers
             {
                 var name = "P" + (i+1);
                 var random = new Random();
+                System.Threading.Thread.Sleep(random.Next(1,200));
                 var randomNumber = random.Next(1, 4);
                 var processItem = new ProcessItem
                 {
