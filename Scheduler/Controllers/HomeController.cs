@@ -19,7 +19,7 @@ namespace Scheduler.Controllers
             Feedback f = new Feedback();
             SJFNonPreemtive s = new SJFNonPreemtive();
             RoundRobin rr = new RoundRobin();
-            Preemptive p = new Preemptive();
+            //Preemptive p = new Preemptive();
             FCFS fcfs = new FCFS();
             List<ProcessItem> processItems = getProcessData(numProcess);
             HomeModel model = new HomeModel
@@ -27,7 +27,7 @@ namespace Scheduler.Controllers
                 NumProcess = numProcess,
                 ProcessItems = processItems,
                 Feedback = f.Run(processItems),
-                SRT = p.Run(processItems)
+                //SRT = p.Run(processItems)
                 //RR = rr.Run(processItems)
                 //FCFS = fcfs.Run(processItems)
                 };
