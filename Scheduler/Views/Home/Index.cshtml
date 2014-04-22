@@ -64,7 +64,7 @@
                 }
                 else if (Model.Feedback.CpuProcesses[i].StartTime > (Model.Feedback.CpuProcesses[i - 1].StartTime + Model.Feedback.CpuProcesses[i-1].Duration))
                 {
-                    <span style="width:@(((Model.Feedback.CpuProcesses[i].StartTime)-(Model.Feedback.CpuProcesses[i-1].StartTime + Model.Feedback.CpuProcesses[i].Duration))*cellWidth)px;" class="Break">@((Model.Feedback.CpuProcesses[i].StartTime)-(Model.Feedback.CpuProcesses[i-1].StartTime + Model.Feedback.CpuProcesses[i].Duration))</span>
+                    <span style="width:@(((Model.Feedback.CpuProcesses[i].StartTime)-(Model.Feedback.CpuProcesses[i-1].StartTime + Model.Feedback.CpuProcesses[i-1].Duration))*cellWidth)px;" class="Break">@((Model.Feedback.CpuProcesses[i].StartTime)-(Model.Feedback.CpuProcesses[i-1].StartTime + Model.Feedback.CpuProcesses[i].Duration))</span>
                 }
                 else
                 {
@@ -86,7 +86,7 @@
                 }
                 else if (Model.Feedback.IoProcesses[i].StartTime > (Model.Feedback.IoProcesses[i - 1].StartTime + Model.Feedback.IoProcesses[i-1].Duration))
                 {
-                    <span style="width:@(((Model.Feedback.IoProcesses[i].StartTime)-(Model.Feedback.IoProcesses[i-1].StartTime + Model.Feedback.IoProcesses[i].Duration))*cellWidth)px;" class="Break">@((Model.Feedback.IoProcesses[i].StartTime)-(Model.Feedback.IoProcesses[i-1].StartTime + Model.Feedback.IoProcesses[i].Duration))</span>
+                    <span style="width:@(((Model.Feedback.IoProcesses[i].StartTime)-(Model.Feedback.IoProcesses[i-1].StartTime + Model.Feedback.IoProcesses[i-1].Duration))*cellWidth)px;" class="Break">@((Model.Feedback.IoProcesses[i].StartTime)-(Model.Feedback.IoProcesses[i-1].StartTime + Model.Feedback.IoProcesses[i].Duration))</span>
                 }
                 else
                 {
