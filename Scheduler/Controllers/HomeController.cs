@@ -30,10 +30,10 @@ namespace Scheduler.Controllers
         public static List<ProcessItem> getProcessData(int numProc)
         {
             var temp = new List<ProcessItem>();
+            var random = new Random();
             for (var i = 0; i < numProc; i++)
             {
                 var name = "P" + (i+1);
-                var random = new Random();
                 var randomNumber = random.Next(1, 4);
                 var processItem = new ProcessItem
                 {
