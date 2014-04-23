@@ -158,6 +158,7 @@ namespace Scheduler.Classes
 
                     //Need to update burst index and arrival time, need to use a temp of the structure because you can't directly modify a structure in an array (not sure why?)
                     int processIndex = first.ProcessIndex;
+                    //int processIndex = queue.First(p => p.process.Name.Equals(first.Name)).burstArrayIndex;
                     KodyProcessItem temp = queue[processIndex];
                     temp.burstArrayIndex++;
                     temp.process.ArrivalTime = temp.process.ArrivalTime + first.Duration;
