@@ -27,6 +27,7 @@ namespace Scheduler.Controllers
                 NumProcess = numProcess,
                 ProcessItems = processItems,
                 Feedback = f.Run(processItems),
+                SPN = s.Run(processItems),
                 //SRT = p.Run(processItems)
                 //RR = rr.Run(processItems)
                 //FCFS = fcfs.Run(processItems)
