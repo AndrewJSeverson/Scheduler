@@ -18,10 +18,11 @@ namespace Scheduler.Controllers
             Feedback f = new Feedback();
             SJFNonPreemtive s = new SJFNonPreemtive();
             //RoundRobin rr = new RoundRobin();
+            List <ProcessItem> test = getProcessData(3);
             HomeModel model = new HomeModel
                 {
-                    Feedback = f.Run(getProcessData(3)),
-                    SRT = s.Run(getProcessData(3))
+                    Feedback = f.Run(test),
+                    SRT = s.Run(test)
                     //RR = rr.Run(getProcessData(3))
                 };
             
