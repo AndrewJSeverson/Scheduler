@@ -18,7 +18,7 @@
             <thead>
                 <th>Process</th>
                 <th>Arrival Time</th>
-                @for (var i = 0; i < Model.ProcessItems[0].BurstArray.Count(); i ++ )
+                @for (var i = 0; i < Model.ProcessItems.Max(x => x.BurstArray.Count()); i ++ )
                 {
                     <th>@(i%2 == 0 ? "CPU" : "I/O") @((i/2)+1)</th>
                 }
@@ -27,7 +27,7 @@
                 @for (var i = 0; i < Model.ProcessItems.Count; i ++ )
                 {
                     <tr>
-                        <td>P @(i+1)</td>
+                        <td class="P@(i+1)">P @(i+1)</td>
                         <td>@Model.ProcessItems[i].ArrivalTime</td>
                         @for (var j = 0; j < Model.ProcessItems[i].BurstArray.Count(); j++){
                             <td>@Model.ProcessItems[i].BurstArray[j]</td>
