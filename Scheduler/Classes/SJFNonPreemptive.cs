@@ -48,10 +48,12 @@ namespace Scheduler.Classes
                 {
                     int cur = queue[i].burstArrayIndex;
                     int arrivalTime = queue[i].process.ArrivalTime;
+                    //If this process hasn't arrived, skip it
                     if (arrivalTime > currentTime)
                     {
                         continue;
                     }
+                    //At least one has arrived
                     noneArrived = false;
 
                     if (cur%2 == 0) //It's a CPU process
@@ -99,15 +101,17 @@ namespace Scheduler.Classes
                     }
                     //Add to CPU wait time
                     waitingTime += (next.process.ArrivalTime - cpuTime);
+                    //Set current time to the next arrival time
                     currentTime = next.process.ArrivalTime;
                     continue;
                 }
 
-
                 bool cpuWaiting = false;
                 if (availableCPUs.Count > 0)
                 {
+                    //Sort bursts that are available
                     availableCPUs.Sort((x, y) => x.Duration.CompareTo(y.Duration));
+                    //Add burst with shortest time to CPU time and remove the burst from the availableCPUs
                     Process first = availableCPUs.First();
                     cpuProcesses.Add(first);
                     cpuTime = first.StartTime + first.Duration;
