@@ -13,17 +13,23 @@ namespace Scheduler.Controllers
         //
         // GET: /Home/
 
-        public ActionResult Index()
+        public ActionResult Index(int? id)
         {
+            int numProcess = id ?? 3;
             Feedback f = new Feedback();
             SJFNonPreemtive s = new SJFNonPreemtive();
-            //RoundRobin rr = new RoundRobin();
-            List <ProcessItem> test = getProcessData(3);
+            RoundRobin rr = new RoundRobin();
+            //Preemptive p = new Preemptive();
+            FCFS fcfs = new FCFS();
+            List<ProcessItem> processItems = getProcessData(numProcess);
             HomeModel model = new HomeModel
                 {
-                    Feedback = f.Run(test),
-                    SRT = s.Run(test)
-                    //RR = rr.Run(getProcessData(3))
+                NumProcess = numProcess,
+                ProcessItems = processItems,
+                Feedback = f.Run(processItems),
+                //SRT = p.Run(processItems)
+                //RR = rr.Run(processItems)
+                //FCFS = fcfs.Run(processItems)
                 };
             
             return View(model);
@@ -35,12 +41,13 @@ namespace Scheduler.Controllers
             {
                 var name = "P" + (i+1);
                 var random = new Random();
+                System.Threading.Thread.Sleep(random.Next(1,200));
                 var randomNumber = random.Next(1, 4);
                 var processItem = new ProcessItem
                 {
                     Name = name,
                     BurstArray = new int[randomNumber * 2 + 1],
-                    ArrivalTime = random.Next(0,12)
+                    ArrivalTime = random.Next(0, 12)
                 };
                 for (var j = 0; j < processItem.BurstArray.Length; j++)
                 {

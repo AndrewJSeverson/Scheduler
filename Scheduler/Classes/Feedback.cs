@@ -59,23 +59,37 @@ namespace Scheduler.Classes
             processes.Sort((x, y) => x.ArrivalTime.CompareTo(y.ArrivalTime));
             queues[0] = processes.Select(l => new KimProcessItem
                         {
-                            process = l,
+                            process = new ProcessItem()
+                                {
+                                    ArrivalTime = l.ArrivalTime, 
+                                    BurstArray = (int [])l.BurstArray.Clone(),
+                                    Name = l.Name
+                                },
                             burstArrayIndex = 0
                         }).ToList();
 
             while (queues[0].Count + queues[1].Count + queues[2].Count + queues[3].Count > 0)
             {
+                foreach (List<KimProcessItem> queue in queues)
+                {
+                    queue.Sort((x, y) => x.process.ArrivalTime.CompareTo(y.process.ArrivalTime));
+                }
+                int minStart = int.MaxValue;
+                int? minIdx = null;
                 for (int i = 0; i < queues.Count; i++)
                 {
-                    if (queues[i].Count > 0)
+                    if (queues[i].Any())
                     {
-                        this.scheduleProcess(i, processes);
-                        //Resort the queue by arrivial time.  This will ensure that when processes shouldn't start they won't
-                        //As the algorithm finsihed this won't do much sorting cause the list will be sorted
-                        queues[i].Sort((x, y) => x.process.ArrivalTime.CompareTo(y.process.ArrivalTime));
-                        break;
+                        int nextStart = queues[i].First().process.ArrivalTime;
+                        if (minStart > nextStart)
+                        {
+                            minStart = nextStart;
+                            minIdx = i;
+                        }
                     }
                 }
+
+               scheduleProcess(minIdx ?? 0, processes);
             }
            
             return new SchedulerResult
@@ -102,14 +116,20 @@ namespace Scheduler.Classes
             //We always take the first item because its first come first serve
             KimProcessItem nextItem = queues[queueId][0];
             int arivialTime = nextItem.process.ArrivalTime;
-            int startTime = currentTime;
             int nextIdx = nextItem.burstArrayIndex;
 
             if (currentTime < arivialTime)
             {
                 //Used for calculating cpu utilization
                 cpuDownTime += (arivialTime - currentTime);
-                startTime = arivialTime;
+                currentTime = arivialTime;
+            }
+            else
+            {
+                //Used to calculates avg wait times
+                waitingTime += (currentTime - arivialTime);
+
+                //Display Processor Wait Times
                 if (processorsWaitTimes.ContainsKey(nextItem.process.Name))
                 {
                     processorsWaitTimes[nextItem.process.Name] += arivialTime - currentTime;
@@ -119,22 +139,18 @@ namespace Scheduler.Classes
                     processorsWaitTimes.Add(nextItem.process.Name, arivialTime - currentTime);
                 }
             }
-            else
-            {
-                //Used to calculates avg wait times
-                waitingTime += (currentTime - arivialTime);
-            }
-
-            int currentBurst = nextItem.process.BurstArray[nextIdx];
-
 
             //This means that the process has terminated at the arrival time.  
             if (nextIdx >= nextItem.process.BurstArray.Count())
             {
                 //find out when the process started by searching the original list and calculate the turn around time.
                 turnAroundTime += (nextItem.process.ArrivalTime - processItems.First(p => p.Name.Equals(nextItem.process.Name)).ArrivalTime);
+                //Remove the item from queue 1
+                queues[queueId].RemoveAt(0);
                 return;
             }
+
+            int currentBurst = nextItem.process.BurstArray[nextIdx];
 
             //This is the last queue it is a special case the process finishes all remaing time here
             //This is because this queue has no quantam
@@ -145,14 +161,20 @@ namespace Scheduler.Classes
                 {
                     Duration = currentBurst,
                     Name = nextItem.process.Name,
-                    StartTime =  startTime
+                    StartTime =  currentTime
                 });
 
                 //Increment the current time by the duration of this burst
                 currentTime += currentBurst;
 
+                //Set the arrival time to right now
+                nextItem.process.ArrivalTime = currentTime;
+
                 //Remove the item from queue 1
                 queues[queueId].RemoveAt(0);
+
+                //Schedule IO event move to next burst
+                scheduleIOEvent(nextItem, nextIdx);
             }
             //If the next burst is less than the cpu cycle
             else if (currentBurst > QueueTimes[queueId])
@@ -162,7 +184,7 @@ namespace Scheduler.Classes
                 {
                     Duration = QueueTimes[queueId],
                     Name = nextItem.process.Name,
-                    StartTime = startTime
+                    StartTime = currentTime
                 });
 
                 //increment current time
@@ -177,7 +199,7 @@ namespace Scheduler.Classes
                 //Add this to the next queue
                 queues[queueId+1].Add(nextItem);
                 
-                //Remove the item from queue 1
+                //Remove the item from queue 
                 queues[queueId].RemoveAt(0);
             }
             else
@@ -187,40 +209,52 @@ namespace Scheduler.Classes
                 {
                     Duration = currentBurst,
                     Name = nextItem.process.Name,
-                    StartTime = startTime
+                    StartTime = currentTime
                 });
                 //increment the current time
-                currentTime = nextItem.process.ArrivalTime + currentBurst;
+                currentTime += currentBurst;
 
-                //If the io time is less than the current time then there is nothing currently schedules so there was an idle time increment iotime
+                //Set the arrival time of this process
+                nextItem.process.ArrivalTime = currentTime;
+
+              scheduleIOEvent(nextItem, nextIdx);
+
+              //Remove the item from the current queue
+              queues[queueId].RemoveAt(0);
+        }
+    }
+
+    private void scheduleIOEvent(KimProcessItem nextItem, int nextIdx)
+        {
+
+            //increment the burst array
+            nextItem.burstArrayIndex += 2;
+          //If the io time is less than the current time then there is nothing currently schedules so there was an idle time increment iotime
                 if (ioTime < currentTime)
                 {
                     ioTime = currentTime;
                 }
 
-                //Schedule the I/O Process
-                ioProcesses.Add(new Process
+                if (nextIdx + 1 < nextItem.process.BurstArray.Length)
                 {
-                    Duration = nextItem.process.BurstArray[nextIdx + 1],
-                    Name = nextItem.process.Name,
-                    StartTime = ioTime
-                });
+                    //Schedule the I/O Process
+                    ioProcesses.Add(new Process
+                    {
+                        Duration = nextItem.process.BurstArray[nextIdx + 1],
+                        Name = nextItem.process.Name,
+                        StartTime = ioTime
+                    });
 
-                //Increment io time
-                ioTime += nextItem.process.BurstArray[nextIdx + 1];
+                    //Increment io time
+                    ioTime += nextItem.process.BurstArray[nextIdx + 1];
 
-                //increment the burst array
-                nextItem.burstArrayIndex += 2;
+                    //Set the arrivial time to right now this is the i/o time it must be after the i/o burst runs
+                    nextItem.process.ArrivalTime = ioTime;
 
-                //Remove the item from the current queue
-                queues[queueId].RemoveAt(0);
+                    //Insert it at the end of queue 0 because it shoudl always start over at queue 0 when a process finishes
+                    queues[0].Add(nextItem);
+                }
 
-                //Set the arrivial time to right now this is the i/o time it must be after the i/o burst runs
-                nextItem.process.ArrivalTime = ioTime;
-
-                //Insert it at the end of queue 0 because
-                queues[queueId].Add(nextItem);
             }
-        }
     }
 }

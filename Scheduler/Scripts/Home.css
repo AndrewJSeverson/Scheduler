@@ -2,6 +2,10 @@
     display: none;
 }
 
+.center {
+    text-align: center;
+}
+
 .GanttContainer{
     border:2px solid;
     border-radius:25px;
@@ -47,6 +51,22 @@
     text-align: center;
 }
 
+.P6
+{
+    display: inline-block; 
+    height:25px;
+    background-color:orange;
+    text-align: center;
+}
+
+.P7
+{
+    display: inline-block; 
+    height:25px;
+    background-color:mediumspringgreen;
+    text-align: center;
+}
+
 .Break{
     display: inline-block; 
     height:25px;
@@ -57,4 +77,12 @@
 #FeedbackOpenClose, #RROpenClose, #STROpenClose, #SPNOpenClose, #FCFSOpenClose
 {
     cursor: pointer;
+}
+
+table, th, td {
+    border: 1px solid black;
+}
+
+#CPUTimeTable {
+    margin: 0 auto;
 }
