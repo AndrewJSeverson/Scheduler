@@ -24,21 +24,34 @@ namespace Scheduler.Classes
             var waits = new int[processes.Count];
             for (int i = 0; i < processes.Count; i++) waits[i] = 0;
 
-            //create separate entry list
-            var entrylist = new List<ProcessItem>();
-            foreach(ProcessItem proc in processes){
-                entrylist.Add(proc);
+           //array to track which burst each process is working on
+            var burstindex = new int[processes.Count];
+            for (int i = 0; i < processes.Count; i++){
+                burstindex[i] = 0;
+            }
+
+            //create initial entry list
+            var entrylist = new List<Process>();
+            for (int i = 0; i < processes.Count; i++){
+                entrylist.Add(
+                    new Process{
+                        Name = processes[i].Name,
+                        StartTime = processes[i].ArrivalTime,
+                        Duration = processes[i].BurstArray[0],
+                        ProcessIndex = i
+                    }
+                );
             }
 
             //ready queues
-            var cpuready = new List<ProcessItem>();
-            var ioready = new List<ProcessItem>();
+            var cpuready = new List<Process>();
+            var ioready = new List<Process>();
 
             //setup for loop
-            var currentcpuproc = entrylist.First();
-            ProcessItem currentioproc = null;
+            Process currentcpuproc = null;
+            Process currentioproc = null;
             entrylist.RemoveAt(0);
-            int clock = currentcpuproc.ArrivalTime;
+            int clock = currentcpuproc.StartTime;
 
             while (ioready.Count != 0 || cpuready.Count != 0 || entrylist.Count != 0)
             {
@@ -46,48 +59,77 @@ namespace Scheduler.Classes
                 bool preempt = false;
 
                 //if a process arrives fresh to the cpu
-                if (entrylist.First().ArrivalTime == clock)
+                if (entrylist[0].StartTime == clock)
                 {
                     preempt = true;
-                    cpuready.Add(entrylist.First());
+                    cpuready.Add(entrylist[0]);
+                    entrylist.RemoveAt(0);
                 }
+
                 //if the current cpu process ends
-                if (currentcpuproc.BurstArray[0] + currentcpuproc.ArrivalTime == clock)
+                if (currentcpuproc.Duration + currentcpuproc.StartTime == clock)
                 {
                     preempt = true;
+                    burstindex[currentcpuproc.ProcessIndex]++;
+                    var tempint = currentcpuproc.ProcessIndex;
+                    if(burstindex[tempint] < processes[tempint].BurstArray.Count())
+                        ioready.Add(
+                            new Process{
+                                Name = currentcpuproc.Name,
+                                StartTime = clock,
+                                Duration = processes[tempint].BurstArray[burstindex[tempint]],
+                                ProcessIndex = currentcpuproc.ProcessIndex
+                            }
+                        );
+                    cpuproc.Add(currentcpuproc);
                     currentcpuproc = null;
-                    cpuproc.Add(
-                        new Process
-                        {
-                            Name = currentcpuproc.Name,
-                            StartTime = currentcpuproc.ArrivalTime,
-                            Duration = currentcpuproc.BurstArray[0]
-                        }
-                    );
                 }
                 //if the current io process ends
-                if (currentioproc != null && currentioproc.BurstArray[0] + currentioproc.ArrivalTime == clock)
+                if (currentioproc != null && currentioproc.Duration + currentioproc.StartTime == clock)
                 {
                     preempt = true;
-                    var temp = new ProcessItem
-                    {
-                        Name = currentioproc.Name,
-                        ArrivalTime = clock
-                    };
-                    currentioproc.BurstArray.CopyTo(temp.BurstArray,1);
-                    cpuready.Add(temp);
+                    burstindex[currentioproc.ProcessIndex]++;
+                    var tempint = currentioproc.ProcessIndex;
+                    cpuready.Add(
+                        new Process{
+                            Name = currentioproc.Name,
+                            StartTime = clock,
+                            Duration = processes[tempint].BurstArray[burstindex[tempint]]
+                        }
+                    );
+                    ioproc.Add(currentioproc);
                     currentioproc = null;
                 }
 
                 //handling preemptions and stuff
                 if (preempt)
                 {
-                    
+                    //TODO
+                }
+
+                if (currentioproc == null){
+                    currentioproc = ioready[0];
+                    ioready.RemoveAt(0);
                 }
             }
- 
 
-            return new SchedulerResult();
+            return new SchedulerResult{
+                SchedulerStats = null, //TODO
+                CpuProcesses = cpuproc,
+                IoProcesses = ioproc
+            };
+        }
+
+        private SchedulerStats calculateStats(int numProcesses, int cpuWaitingTime, int processWaitTime, int currentTime, int turnAround, Dictionary<string, int> processorsWaitTimes, Dictionary<string, double> processTurnAroundTimes)
+        {
+            return new SchedulerStats
+            {
+                AverageTurnAroundTime = ((double)turnAround) / numProcesses,
+                CpuUtilization = ((double)currentTime - cpuWaitingTime) / currentTime,
+                AverageWaitingTime = ((double)processWaitTime) / numProcesses,
+                ProcessWaitTimes = processorsWaitTimes,
+                ProcessTurnAroundTimes = processTurnAroundTimes
+            };
         }
     }
 }
