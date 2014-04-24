@@ -201,7 +201,7 @@
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
 -->
 
-<h1 id="SPNOpenClose">Shortes Process Next (non-preemptive) Algorithm</h1>
+<h1 id="SPNOpenClose">Shortest Process Next (non-preemptive) Algorithm</h1>
 <hr/>
 
 <div id="SPNContainer" class="hidden">
@@ -213,17 +213,17 @@
                 {
                     if (Model.SPN.CpuProcesses[i].StartTime != 0)
                     {
-                        <span style="width: @(Model.SPN.CpuProcesses[i].StartTime*cellWidth)px;" class="Break">@Model.SPN.CpuProcesses[i].StartTime</span>
+                        <span startTime="@(Model.SPN.CpuProcesses[i].StartTime)" duration="@(Model.SPN.CpuProcesses[i].Duration)" style="width: @(Model.SPN.CpuProcesses[i].StartTime*cellWidth)px;" class="Break">@Model.SPN.CpuProcesses[i].StartTime</span>
                     }
-                    <span style="width: @(Model.SPN.CpuProcesses[i].Duration*cellWidth)px;" class="@Model.SPN.CpuProcesses[i].Name">@Model.SPN.CpuProcesses[i].Duration</span>
+                    <span startTime="@(Model.SPN.CpuProcesses[i].StartTime)" duration="@(Model.SPN.CpuProcesses[i].Duration)" style="width: @(Model.SPN.CpuProcesses[i].Duration*cellWidth)px;" class="@Model.SPN.CpuProcesses[i].Name">@Model.SPN.CpuProcesses[i].Duration</span>
                 }
                 else
                 {
                     if (Model.SPN.CpuProcesses[i].StartTime > (Model.SPN.CpuProcesses[i - 1].StartTime + Model.SPN.CpuProcesses[i - 1].Duration))
                     {
-                        <span style="width: @(((Model.SPN.CpuProcesses[i].StartTime) - (Model.SPN.CpuProcesses[i - 1].StartTime + Model.SPN.CpuProcesses[i - 1].Duration))*cellWidth)px;" class="Break">@((Model.SPN.CpuProcesses[i].StartTime) - (Model.SPN.CpuProcesses[i - 1].StartTime + Model.SPN.CpuProcesses[i].Duration))</span>
+                        <span startTime="@(Model.SPN.CpuProcesses[i].StartTime)" duration="@(Model.SPN.CpuProcesses[i].Duration)" style="width: @(((Model.SPN.CpuProcesses[i].StartTime) - (Model.SPN.CpuProcesses[i - 1].StartTime + Model.SPN.CpuProcesses[i - 1].Duration))*cellWidth)px;" class="Break">@((Model.SPN.CpuProcesses[i].StartTime) - (Model.SPN.CpuProcesses[i - 1].StartTime + Model.SPN.CpuProcesses[i-1].Duration))</span>
                     }
-                    <span style="width: @(Model.SPN.CpuProcesses[i].Duration*cellWidth)px;" class="@Model.SPN.CpuProcesses[i].Name">@Model.SPN.CpuProcesses[i].Duration</span>
+                    <span startTime="@(Model.SPN.CpuProcesses[i].StartTime)" duration="@(Model.SPN.CpuProcesses[i].Duration)" style="width: @(Model.SPN.CpuProcesses[i].Duration*cellWidth)px;" class="@Model.SPN.CpuProcesses[i].Name">@Model.SPN.CpuProcesses[i].Duration</span>
                 }
             }
         </div>
@@ -235,17 +235,17 @@
             {
                 if (Model.SPN.IoProcesses[i].StartTime != 0)
                 {
-                    <span style="width: @(Model.SPN.IoProcesses[i].StartTime*cellWidth)px;" class="Break">@Model.SPN.IoProcesses[i].StartTime</span>
+                    <span startTime="@(Model.SPN.IoProcesses[i].StartTime)" duration="@(Model.SPN.IoProcesses[i].Duration)" style="width: @(Model.SPN.IoProcesses[i].StartTime*cellWidth)px;" class="Break">@Model.SPN.IoProcesses[i].StartTime</span>
                 }
-                <span style="width: @(Model.SPN.IoProcesses[i].Duration*cellWidth)px;" class="@Model.SPN.IoProcesses[i].Name">@Model.SPN.IoProcesses[i].Duration</span>
+                <span startTime="@(Model.SPN.IoProcesses[i].StartTime)" duration="@(Model.SPN.IoProcesses[i].Duration)" style="width: @(Model.SPN.IoProcesses[i].Duration*cellWidth)px;" class="@Model.SPN.IoProcesses[i].Name">@Model.SPN.IoProcesses[i].Duration</span>
             }
             else
             {
                 if (Model.SPN.IoProcesses[i].StartTime > (Model.SPN.IoProcesses[i - 1].StartTime + Model.SPN.IoProcesses[i - 1].Duration))
                 {
-                    <span style="width: @(((Model.SPN.IoProcesses[i].StartTime) - (Model.SPN.IoProcesses[i - 1].StartTime + Model.SPN.IoProcesses[i - 1].Duration))*cellWidth)px;" class="Break">@((Model.SPN.IoProcesses[i].StartTime) - (Model.SPN.IoProcesses[i - 1].StartTime + Model.SPN.IoProcesses[i - 1].Duration))</span>
+                    <span startTime="@(Model.SPN.IoProcesses[i].StartTime)" duration="@(Model.SPN.IoProcesses[i].Duration)" style="width: @(((Model.SPN.IoProcesses[i].StartTime) - (Model.SPN.IoProcesses[i - 1].StartTime + Model.SPN.IoProcesses[i - 1].Duration))*cellWidth)px;" class="Break">@((Model.SPN.IoProcesses[i].StartTime) - (Model.SPN.IoProcesses[i - 1].StartTime + Model.SPN.IoProcesses[i - 1].Duration))</span>
                 }
-                <span style="width: @(Model.SPN.IoProcesses[i].Duration*cellWidth)px;" class="@Model.SPN.IoProcesses[i].Name">@Model.SPN.IoProcesses[i].Duration</span>
+                <span startTime="@(Model.SPN.IoProcesses[i].StartTime)" duration="@(Model.SPN.IoProcesses[i].Duration)" style="width: @(Model.SPN.IoProcesses[i].Duration*cellWidth)px;" class="@Model.SPN.IoProcesses[i].Name">@Model.SPN.IoProcesses[i].Duration</span>
             }
         }
     </div>
@@ -281,11 +281,11 @@
                 </tr>
                 <tr>
                     <td>Average Waiting Time</td>
-                    <td>@Model.SPN.SchedulerStats.AverageWaitingTime</td>
+                    <td>@Math.Round(Model.SPN.SchedulerStats.AverageWaitingTime,2)</td>
                 </tr>
                 <tr>
                     <td>Average Turnaround Time</td>
-                    <td>@Model.SPN.SchedulerStats.AverageTurnAroundTime</td>
+                    <td>@Math.Round(Model.SPN.SchedulerStats.AverageTurnAroundTime,2)</td>
                 </tr>
             </tbody>
         </table>
