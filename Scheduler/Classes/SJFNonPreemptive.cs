@@ -18,14 +18,27 @@ namespace Scheduler.Classes
     {
         public override SchedulerResult Run(List<ProcessItem> processes)
         {
-            Dictionary<string, int> processorsWaitTimes = new Dictionary<string, int>();
-
-            var queue = new List<KodyProcessItem>();
+            //Sort processes by arrival time
             processes.Sort((x, y) => x.ArrivalTime.CompareTo(y.ArrivalTime));
 
-            //Return list of cpu processes
+            //used to track wait times/turn around times
+            var processorsWaitTimes = new Dictionary<string, int>();
+            var processTurnAroundTimes = new Dictionary<string, double>();
+            var queue = new List<KodyProcessItem>();
+            
+            
+            int totalArrivalTime = 0;
+            int totalEndTime = 0;
+            //Add arrival times into process turn around tracker
+            foreach (ProcessItem p in processes)
+            {
+                processTurnAroundTimes.Add(p.Name, p.ArrivalTime);
+                totalArrivalTime += p.ArrivalTime;
+            }
+
+            //List of CPU bursts that will be given to GUI
             var cpuProcesses = new List<Process>();
-            //Return list of io processes
+            //List of IO bursts that will be given to IO
             var ioProcesses = new List<Process>();
 
             //Add first process to list of current processes, since we have them ordered by arrival time
@@ -190,27 +203,31 @@ namespace Scheduler.Classes
                 {
                     foreach (KodyProcessItem pi in processesToDelete)
                     {
+                        processTurnAroundTimes[pi.process.Name] = pi.process.ArrivalTime - processTurnAroundTimes[pi.process.Name];
+                        totalEndTime += pi.process.ArrivalTime;
                         queue.Remove(pi);
                     }
                 }   
             }
 
+            int totalTurnAround = totalEndTime - totalArrivalTime;
             return new SchedulerResult
             {
                 CpuProcesses = cpuProcesses,
                 IoProcesses = ioProcesses,
-                SchedulerStats = calculateStats(processes.Count, cpuWaitTime, processWaitTime,  currentTime, processorsWaitTimes)
+                SchedulerStats = calculateStats(processes.Count, cpuWaitTime, processWaitTime, currentTime, totalTurnAround, processorsWaitTimes, processTurnAroundTimes)
             };
         }
 
-        private SchedulerStats calculateStats(int numProcesses, int cpuWaitingTime, int processWaitTime, int currentTime, Dictionary<string, int> processorsWaitTimes)
+        private SchedulerStats calculateStats(int numProcesses, int cpuWaitingTime, int processWaitTime, int currentTime, int turnAround, Dictionary<string, int> processorsWaitTimes, Dictionary<string, double> processTurnAroundTimes)
         {
             return new SchedulerStats
             {
-                AverageTurnAroundTime = 0.0,//((double)turnAroundTime) / numProcesses, each process end - start time
+                AverageTurnAroundTime = ((double)turnAround) / numProcesses,
                 CpuUtilization = ((double)currentTime - cpuWaitingTime) / currentTime,
                 AverageWaitingTime = ((double)processWaitTime) / numProcesses,
-                ProcessWaitTimes = processorsWaitTimes
+                ProcessWaitTimes = processorsWaitTimes,
+                ProcessTurnAroundTimes = processTurnAroundTimes
             };
         }
     }
