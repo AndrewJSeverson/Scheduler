@@ -13,8 +13,17 @@ namespace Scheduler.Classes
     {
         public override SchedulerResult Run(List<Models.ProcessItem> processes)
         {
+            int[] waitTimes = new int[processes.Count];
+            int[] arrivalTimes = new int[processes.Count];
+            for (int i = 0; i < processes.Count; i++)
+            {
+                arrivalTimes[i] = processes[i].ArrivalTime;
+            }
+
             // Sort the processes in order of arrival time.
-            processes.Sort((x,y) => x.ArrivalTime.CompareTo(y.ArrivalTime));
+            processes.Sort((x, y) => x.ArrivalTime.CompareTo(y.ArrivalTime));
+
+            List<Models.ProcessItem> copyProcesses = processes;
 
             // List of CPU Processes
             var cpuProcesses = new List<Process>();
@@ -22,130 +31,197 @@ namespace Scheduler.Classes
             // List of IO Processes
             var ioProcesses = new List<Process>();
 
-            var processData = new int[processes.Count,4]; // I guess this is C# notation for creating a multi-dimensional array.
-            for (int i = 0; i < processData.Length; i++)
+            // Information about where we are when accessing process data, etc. 
+            var processData = new int[processes.Count,4];
+            for (int i = 0; i < processes.Count; i++)
             {
-                processData[i, 0] = 0; // current index in im on in a process
-                processData[i, 1] = processes[i].BurstArray.Length - 1; // Max index of a process
-                processData[i, 2] = 0; // wait time of a particular process
+                processData[i, 0] = 0;  // Current index of 'processes'
+                processData[i, 1] = processes[i].BurstArray.Length - 1; // Maximum length of the burst array for a particular process
+                processData[i, 2] = 0; // Current burst array index of the particular process we're looking at.
+                processData[i, 3] = 1;
             }
 
-            // Add first process to list of current processes, since we have them ordered by arrival time.
-            int currentTime, cpuTime, ioTime, waitingTime;
-            currentTime = cpuTime = ioTime = waitingTime = processes.First().ArrivalTime;
+            var availableCPUs = new List<Process>();
+            var availableIOs = new List<Process>();
 
-            while (processes.Count > 0)
+            int currentTime = 0;
+            int ioTime = 0;
+            int waitingTime = 0;
+            int cpuTime = 0;
+            bool finished = false;
+            while (!finished)
             {
-                //List of cpus/ios available to add to "queue"
-                var availableCPUs = new List<Process>();
-                var availableIOs = new List<Process>();
-
+                // Loop through the processes and create new things from them
                 for (int i = 0; i < processes.Count; i++)
                 {
-                    int cur = processData[i, 0];
-                    //CPU burst, even indexes, processes has to have arrived
-                    if (cur % 2 == 0 && processes[i].ArrivalTime <= currentTime && cpuTime <= currentTime)
+                    // Sometimes we're done with processes and we don't need to get more from them. 
+                    if (processData[i, 3] == 0)
+                    {
+                        continue;
+                    }
+                    int currentProc = processData[i, 0];
+                    int currentBurstIndex = processData[i, 2];
+
+                    if (currentBurstIndex%2 == 0)
                     {
                         availableCPUs.Add(
                             new Process
-                            {
-                                Name = processes[i].Name,
-                                StartTime = cpuTime,
-                                Duration = processes[i].BurstArray[cur],
-                                ProcessIndex = i
-                            }
-                        );
+                                {
+                                    Name = processes[i].Name,
+                                    Duration = processes[i].BurstArray[currentBurstIndex],
+                                    ProcessIndex = i,
+                                    StartTime = cpuTime
+                                }
+                            );
                     }
-                    //IO burst, odd indxes, process has to have arrived
-                    else if (processes[i].ArrivalTime <= currentTime && ioTime <= currentTime)
+
+
+                    if (currentBurstIndex%2 > 0)
                     {
                         availableIOs.Add(
                             new Process
-                            {
-                                Name = processes[i].Name,
-                                StartTime = ioTime,
-                                Duration = processes[i].BurstArray[cur],
-                                ProcessIndex = i
-                            }
-                        );
+                                {
+                                    Name = processes[i].Name,
+                                    Duration = processes[i].BurstArray[currentBurstIndex],
+                                    ProcessIndex = i,
+                                    StartTime = cpuTime
+                                });
                     }
-                    //Increase position in process burst array
-                    processData[i, 0]++;
-                    //Check if you've reached the last "burst" of this process, if so remove it
-                    int end = processData[i, 1];
-                    if (cur == end)
+
+
+                    // Increment the current burst index for the process we're looking at
+                    currentBurstIndex = currentBurstIndex+1;
+
+                    // If the current burst index is larger than the max burst index, then we're done, pull it from the processes list.
+                    if (currentBurstIndex > processData[i, 1])
                     {
-                        processes.RemoveAt(i);
+                        processData[i, 3] = 0;
+                    }
+                    else
+                    {
+                        processData[i, 2] = currentBurstIndex;
                     }
                 }
-
-                //If any CPU bursts are available, sort them and add the shortest one to our lists
-                bool cpuWaiting = false;
-                if (availableCPUs.Count > 0)
+                finished = true;
+                for (int j = 0; j < processes.Count; j++)
                 {
-                    Process first = availableCPUs.First();
-                    cpuProcesses.Add(first);
-                    cpuTime = (first.StartTime + first.Duration);
-                    availableCPUs.RemoveAt(0);
-
-                    //If any remain, we have to iterate over them and add to their wait times
-                    if (availableCPUs.Count > 0)
+                    if (processData[j, 3] == 1)
                     {
-                        foreach (var p in availableCPUs)
-                        {
-                            //Added wait time is same as what we added to cpuTime
-                            processData[p.ProcessIndex, 2] += first.Duration;
-                        }
+                        finished = false;
                     }
+                }
+            }
+            
+            // At this point, we should have two queues of processes, CPU and IO.
+            // They are ordered in an FCFS fashion.
+            // Now, we need to run through and schedule them.
+
+            // We need to increment the waiting, current, io and cpu times 
+            // to whatever the arrival time of the first process is, 
+            // since we're just going to be sitting around waiting.
+            int arrivalTime = processes.Min(x => x.ArrivalTime);
+            cpuTime = waitingTime = ioTime = currentTime = arrivalTime;
+
+            bool cpuWaiting = false;
+            bool ioWaiting = false;
+
+            int cpuWait = 0;
+            int ioWait = 0;
+
+            // While there is still work to be done in BOTH queues
+            while (availableCPUs.Count > 0 && availableIOs.Count > 0)
+            {
+                // Grab the first two processes off the list.
+                Process CPUProc = availableCPUs.First();
+                Process IOProc;
+                try
+                {
+                    IOProc = availableIOs.First(x => x.ProcessIndex != CPUProc.ProcessIndex);
+                        // Grab the first IO Process that is not the same as the CPU process
+                }
+                catch (InvalidOperationException e)
+                {
+                    // If we get here, that means there doesn't exist an IO operation that is not the same as a CPU opeation.
+                    // So.... we're waiting.
+                    ioWaiting = true;
+                    IOProc = null;
+                }
+
+
+                // Process CPU if and only if the process has already arrived. 
+                if (processes[CPUProc.ProcessIndex].ArrivalTime >= arrivalTime && cpuTime == currentTime)
+                {
+                    cpuTime = cpuTime + CPUProc.Duration;
+                    cpuProcesses.Add(CPUProc);
+                    availableCPUs.RemoveAt(availableCPUs.IndexOf(CPUProc));
                 }
                 else
                 {
                     cpuWaiting = true;
                 }
 
-                //If any IO bursts are available, sort them and add the shortest one to our lists
-                bool ioWaiting = false;
-                if (availableIOs.Count > 0)
+                // Process IO if and only if the process has already arrived. 
+                if (!ioWaiting && IOProc != null && processes[IOProc.ProcessIndex].ArrivalTime >= arrivalTime && ioTime == currentTime)
                 {
-                    Process first = availableIOs.First();
-                    ioProcesses.Add(first);
-                    ioTime = first.StartTime + first.Duration;
-                    availableIOs.RemoveAt(0);
-
-                    //If any remain, we have to iterate over them and add to their wait times
-                    if (availableIOs.Count > 0)
-                    {
-                        foreach (var p in availableIOs)
-                        {
-                            //Added wait time is same as what we added to cpuTime
-                            processData[p.ProcessIndex, 2] += first.Duration;
-                        }
-                    }
+                    ioTime = ioTime + IOProc.Duration;
+                    ioProcesses.Add(IOProc);
+                    availableIOs.RemoveAt(availableIOs.IndexOf(IOProc));
                 }
-                //Nothing to put on IO, so it's waiting
                 else
                 {
                     ioWaiting = true;
                 }
 
-                if (cpuWaiting && ioWaiting)//TODO need to commit
+
+
+                foreach (ProcessItem x in processes.Where(x => x.ArrivalTime <= arrivalTime))
                 {
-                    //TODO currently unhandled..and it's a rare case. I presume I would have to simply "reset" all the variables to the next closest IO/CPU
-                }
-                else if (cpuWaiting)
-                {
-                    waitingTime += ioTime - cpuTime; //TODO this logic may be bad? Not sure if CPU can be waiting
-                    cpuTime = ioTime;//Because IO pushed time forward
-                }
-                else if (ioWaiting)
-                {
-                    ioTime = cpuTime;//Because CPU pushed time forward
+                    waitTimes[processes.IndexOf(x)] += Math.Min(ioTime, cpuTime) - currentTime;
                 }
 
-                //Set current time to minimum of cpu and io time
-                currentTime = cpuTime > ioTime ? ioTime : cpuTime; 
+                // Advance the current time to whatever the shortest process is.
+                if (!ioWaiting && !cpuWaiting)
+                {
+                    currentTime = Math.Min(cpuTime, ioTime);
+                }
+                else if (ioWaiting && !cpuWaiting)
+                {
+                    ioWait += cpuTime - currentTime;
+                    currentTime = cpuTime;
+                } else if (cpuWaiting && !ioWaiting)
+                {
+                    cpuWait += ioTime - currentTime;
+                    currentTime = ioTime;
+                }
+                else
+                {
+                    // This is a weird case that I'm not going to handle, because
+                    // the CPU and IO should never be waiting at the same time.
+                }
             }
 
+            // If there is still processor work to do, do it.
+            while (availableCPUs.Count > 0)
+            {
+                Process CPUProc = availableCPUs.First();
+                cpuTime = cpuTime + CPUProc.Duration;
+                cpuProcesses.Add(CPUProc);
+                availableCPUs.RemoveAt(0);
+
+                ioWait = cpuTime - currentTime;
+                currentTime = ioTime = cpuTime;
+            }
+
+            while (availableIOs.Count > 0)
+            {
+                Process IOProc = availableIOs.First();
+                ioTime = ioTime + IOProc.Duration;
+                ioProcesses.Add(IOProc);
+                availableIOs.RemoveAt(0);
+
+                cpuWait = ioTime - currentTime;
+                currentTime = cpuTime = ioTime;
+            }
 
             /*
              CALCULATE STATS AND RETURN 'EM
@@ -153,9 +229,9 @@ namespace Scheduler.Classes
 
             //Grab processes wait times from my process data and put it into the dictionary....Kim already had this method setup, so bleh
             var processorsWaitTimes = new Dictionary<string, int>();
-            for (int i = 0; i < processData.Length; i++)
+            for (int i = 0; i < processes.Count; i++)
             {
-                processorsWaitTimes.Add(processes[i].Name, processData[i, 2]);
+                processorsWaitTimes.Add(processes[i].Name, waitTimes[i]);
             }
 
             return new SchedulerResult
