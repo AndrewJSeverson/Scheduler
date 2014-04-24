@@ -12,6 +12,8 @@ namespace Scheduler.Classes
 
     public class Feedback : Scheduler
     {
+        private List<ProcessItem> processItems; 
+
         //Hard coded queue times based on the assignment description
         private List<int> QueueTimes = new List<int>
             {
@@ -54,9 +56,15 @@ namespace Scheduler.Classes
             ioTime = 0;
             cpuDownTime = 0;
             waitingTime = 0;
+            
+            //Initialize Process Dictonary for the process wait times
+            processorsWaitTimes = processes.ToDictionary(p => p.Name, p => 0);
 
             //Sort the list by arrivial times and pick the first one to start.
             processes.Sort((x, y) => x.ArrivalTime.CompareTo(y.ArrivalTime));
+
+            processItems = processes;
+
             queues[0] = processes.Select(l => new KimProcessItem
                         {
                             process = new ProcessItem()
@@ -68,28 +76,49 @@ namespace Scheduler.Classes
                             burstArrayIndex = 0
                         }).ToList();
 
-            while (queues[0].Count + queues[1].Count + queues[2].Count + queues[3].Count > 0)
+            while (queues[0].Any() || queues[1].Count + queues[2].Count + queues[3].Count > 0)
             {
                 foreach (List<KimProcessItem> queue in queues)
                 {
                     queue.Sort((x, y) => x.process.ArrivalTime.CompareTo(y.process.ArrivalTime));
                 }
-                int minStart = int.MaxValue;
-                int? minIdx = null;
-                for (int i = 0; i < queues.Count; i++)
+                
+                if (queues[0].Any(p => p.process.ArrivalTime <= currentTime))
                 {
-                    if (queues[i].Any())
+                    this.scheduleProcess(0);
+                }
+                else if (queues[1].Any(p => p.process.ArrivalTime <= currentTime))
+                {
+                    this.scheduleProcess(1);
+                }
+                else if (queues[2].Any(p => p.process.ArrivalTime <= currentTime))
+                {
+                    this.scheduleProcess(2);
+                }
+                else if (queues[3].Any(p => p.process.ArrivalTime <= currentTime))
+                {
+                    this.scheduleProcess(3);
+                }
+                else
+                {
+                    //If none of the processes start before the cureent time pick the one that gets there first
+                    int minStart = int.MaxValue;
+                    int? minIdx = null;
+                    for (int i = 0; i < queues.Count; i++)
                     {
-                        int nextStart = queues[i].First().process.ArrivalTime;
-                        if (minStart > nextStart)
+                        if (queues[i].Any())
                         {
-                            minStart = nextStart;
-                            minIdx = i;
+                            int nextStart = queues[i].First().process.ArrivalTime;
+                            if (nextStart <= currentTime && minStart > nextStart)
+                            {
+                                minStart = nextStart;
+                                minIdx = i;
+                            }
                         }
                     }
-                }
 
-               scheduleProcess(minIdx ?? 0, processes);
+                    this.scheduleProcess(minIdx ?? 0);
+                }
             }
            
             return new SchedulerResult
@@ -111,7 +140,7 @@ namespace Scheduler.Classes
                 };
         }
 
-        private void scheduleProcess(int queueId, List<ProcessItem> processItems)
+        private void scheduleProcess(int queueId)
         {
             //We always take the first item because its first come first serve
             KimProcessItem nextItem = queues[queueId][0];
@@ -130,24 +159,7 @@ namespace Scheduler.Classes
                 waitingTime += (currentTime - arivialTime);
 
                 //Display Processor Wait Times
-                if (processorsWaitTimes.ContainsKey(nextItem.process.Name))
-                {
-                    processorsWaitTimes[nextItem.process.Name] += arivialTime - currentTime;
-                }
-                else
-                {
-                    processorsWaitTimes.Add(nextItem.process.Name, arivialTime - currentTime);
-                }
-            }
-
-            //This means that the process has terminated at the arrival time.  
-            if (nextIdx >= nextItem.process.BurstArray.Count())
-            {
-                //find out when the process started by searching the original list and calculate the turn around time.
-                turnAroundTime += (nextItem.process.ArrivalTime - processItems.First(p => p.Name.Equals(nextItem.process.Name)).ArrivalTime);
-                //Remove the item from queue 1
-                queues[queueId].RemoveAt(0);
-                return;
+                processorsWaitTimes[nextItem.process.Name]+= currentTime - arivialTime;
             }
 
             int currentBurst = nextItem.process.BurstArray[nextIdx];
@@ -239,11 +251,11 @@ namespace Scheduler.Classes
                 {
                     //Schedule the I/O Process
                     ioProcesses.Add(new Process
-                    {
-                        Duration = nextItem.process.BurstArray[nextIdx + 1],
-                        Name = nextItem.process.Name,
-                        StartTime = ioTime
-                    });
+                        {
+                            Duration = nextItem.process.BurstArray[nextIdx + 1],
+                            Name = nextItem.process.Name,
+                            StartTime = ioTime
+                        });
 
                     //Increment io time
                     ioTime += nextItem.process.BurstArray[nextIdx + 1];
@@ -253,6 +265,12 @@ namespace Scheduler.Classes
 
                     //Insert it at the end of queue 0 because it shoudl always start over at queue 0 when a process finishes
                     queues[0].Add(nextItem);
+                }
+                else
+                {
+                    //find out when the process started by searching the original list and calculate the turn around time.
+                    //this process has now finished.
+                    turnAroundTime += (nextItem.process.ArrivalTime - processItems.First(p => p.Name.Equals(nextItem.process.Name)).ArrivalTime);
                 }
 
             }
