@@ -1,5 +1,8 @@
-﻿namespace Scheduler.Models
+﻿using System;
+
+namespace Scheduler.Models
 {
+    [Serializable]
     public class ProcessItem
     {
         public string Name { get; set; }
