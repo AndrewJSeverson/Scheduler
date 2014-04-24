@@ -147,14 +147,6 @@ namespace Scheduler.Classes
                     foreach (Process p in availableCPUs)
                     {
                         processorsWaitTimes[p.Name] += first.Duration;
-                        /*if (processorsWaitTimes.ContainsKey(p.Name))
-                        {
-                            
-                        }
-                        else
-                        {
-                            processorsWaitTimes.Add(p.Name, first.Duration);
-                        }*/
                         processWaitTime += first.Duration;
                     }
                 }
