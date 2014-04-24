@@ -149,9 +149,10 @@ namespace Scheduler.Classes
 
 
                 // Process CPU if and only if the process has already arrived. 
-                if (processes[CPUProc.ProcessIndex].ArrivalTime >= arrivalTime && cpuTime == currentTime)
+                if (processes[CPUProc.ProcessIndex].ArrivalTime <= currentTime && cpuTime == currentTime)
                 {
                     cpuTime = cpuTime + CPUProc.Duration;
+                    CPUProc.StartTime = currentTime;
                     cpuProcesses.Add(CPUProc);
                     availableCPUs.RemoveAt(availableCPUs.IndexOf(CPUProc));
                 }
@@ -161,9 +162,10 @@ namespace Scheduler.Classes
                 }
 
                 // Process IO if and only if the process has already arrived. 
-                if (!ioWaiting && IOProc != null && processes[IOProc.ProcessIndex].ArrivalTime >= arrivalTime && ioTime == currentTime)
+                if (!ioWaiting && IOProc != null && processes[IOProc.ProcessIndex].ArrivalTime <= currentTime && ioTime == currentTime)
                 {
                     ioTime = ioTime + IOProc.Duration;
+                    IOProc.StartTime = currentTime;
                     ioProcesses.Add(IOProc);
                     availableIOs.RemoveAt(availableIOs.IndexOf(IOProc));
                 }
@@ -176,13 +178,13 @@ namespace Scheduler.Classes
 
                 foreach (ProcessItem x in processes.Where(x => x.ArrivalTime <= arrivalTime))
                 {
-                    waitTimes[processes.IndexOf(x)] += Math.Min(ioTime, cpuTime) - currentTime;
+                    waitTimes[processes.IndexOf(x)] += Math.Max(ioTime, cpuTime) - currentTime;
                 }
 
                 // Advance the current time to whatever the shortest process is.
                 if (!ioWaiting && !cpuWaiting)
                 {
-                    currentTime = Math.Min(cpuTime, ioTime);
+                    currentTime = Math.Max(cpuTime, ioTime);
                 }
                 else if (ioWaiting && !cpuWaiting)
                 {
