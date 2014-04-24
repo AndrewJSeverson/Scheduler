@@ -34,6 +34,7 @@ namespace Scheduler.Classes
             {
                 processTurnAroundTimes.Add(p.Name, p.ArrivalTime);
                 totalArrivalTime += p.ArrivalTime;
+                processorsWaitTimes.Add(p.Name, 0);
             }
 
             //List of CPU bursts that will be given to GUI
@@ -145,14 +146,7 @@ namespace Scheduler.Classes
                     //Increment each processes wait time that's still waiting in the available cpus
                     foreach (Process p in availableCPUs)
                     {
-                        if (processorsWaitTimes.ContainsKey(p.Name))
-                        {
-                            processorsWaitTimes[p.Name] += first.Duration;
-                        }
-                        else
-                        {
-                            processorsWaitTimes.Add(p.Name, first.Duration);
-                        }
+                        processorsWaitTimes[p.Name] += first.Duration;
                         processWaitTime += first.Duration;
                     }
                 }

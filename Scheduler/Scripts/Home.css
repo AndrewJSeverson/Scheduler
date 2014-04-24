@@ -8,7 +8,6 @@
 
 .GanttContainer{
     border:2px solid;
-    border-radius:25px;
     padding-right:10px;
     width: 5000px;
 }
@@ -19,6 +18,7 @@
     background-color:lightblue;
     text-align: center;
     height: 50px;
+    margin-left: -4px;
 }
 
 .P2
@@ -28,6 +28,7 @@
     background-color:red;
     text-align: center;
     height: 50px;
+    margin-left: -4px;
 }
 
 .P3
@@ -37,6 +38,7 @@
     background-color:green;
     text-align: center;
     height: 50px;
+    margin-left: -4px;
 }
 
 .P4
@@ -46,6 +48,7 @@
     background-color:yellow;
     text-align: center;
     height: 50px;
+    margin-left: -4px;
 }
 
 .P5
@@ -55,6 +58,7 @@
     background-color:purple;
     text-align: center;
     height: 50px;
+    margin-left: -4px;
 }
 
 .P6
@@ -64,6 +68,7 @@
     background-color:orange;
     text-align: center;
     height: 50px;
+    margin-left: -4px;
 }
 
 .P7
@@ -73,6 +78,7 @@
     background-color:mediumspringgreen;
     text-align: center;
     height: 50px;
+    margin-left: -4px;
 }
 
 .Break{
@@ -81,6 +87,7 @@
     background-color:grey;
     text-align: center;
     height: 50px;
+    margin-left: -4px;
 }
 
 #FeedbackOpenClose, #RROpenClose, #STROpenClose, #SPNOpenClose, #FCFSOpenClose

@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Web.Mvc;
 using Scheduler.Classes;
 using Scheduler.Models;
@@ -23,9 +26,9 @@ namespace Scheduler.Controllers
             HomeModel model = new HomeModel
                 {
                 NumProcess = numProcess,
-                ProcessItems = (List<ProcessItem>) Helper.DeepCopy(processItems),
-                Feedback = f.Run((List<ProcessItem>)Helper.DeepCopy(processItems)),
-                SPN = s.Run((List<ProcessItem>)Helper.DeepCopy(processItems)),
+                ProcessItems = Helper.Clone(processItems),
+                Feedback = f.Run(Helper.Clone(processItems)),
+                SPN = s.Run(Helper.Clone(processItems)),
                 //SRT = p.Run(processItems)
                 //RR = rr.Run(processItems)
                 //FCFS = fcfs.Run(processItems)
