@@ -29,8 +29,8 @@ namespace Scheduler.Classes
             var ioProcesses = new List<Process>();
 
             //Add first process to list of current processes, since we have them ordered by arrival time
-            int currentTime, cpuTime, ioTime, waitingTime;
-            currentTime = cpuTime = ioTime = waitingTime = 0;
+            int currentTime, cpuTime, ioTime, processWaitTime, cpuWaitTime;
+            currentTime = cpuTime = ioTime = processWaitTime = cpuWaitTime = 0;
             queue = processes.Select(l => new KodyProcessItem
             {
                 process = l,
@@ -42,7 +42,7 @@ namespace Scheduler.Classes
                 //List of cpus/ios available to add to "queue"
                 var availableCPUs = new List<Process>();
                 var availableIOs = new List<Process>();
-
+                var processesToDelete = new List<KodyProcessItem>();
                 var noneArrived = true;
                 for (int i = 0; i < queue.Count; i++)
                 {
@@ -100,7 +100,7 @@ namespace Scheduler.Classes
                         }
                     }
                     //Add to CPU wait time
-                    waitingTime += (next.process.ArrivalTime - cpuTime);
+                    cpuWaitTime += (next.process.ArrivalTime - cpuTime);
                     //Set current time to the next arrival time
                     currentTime = next.process.ArrivalTime;
                     continue;
@@ -123,10 +123,11 @@ namespace Scheduler.Classes
                     temp.burstArrayIndex++;
                     temp.process.ArrivalTime = temp.process.ArrivalTime + first.Duration;
                     queue[processIndex] = temp;
-                    //If this was the last burst for this process, remove it from our queue
+                    //If this was the last burst for this process, add it to the delete list
+
                     if (temp.burstArrayIndex >= queue[processIndex].process.BurstArray.Length)
                     {
-                        queue.RemoveAt(processIndex);
+                        processesToDelete.Add(queue[processIndex]);
                     }
                     //Increment each processes wait time that's still waiting in the available cpus
                     foreach (Process p in availableCPUs)
@@ -139,13 +140,13 @@ namespace Scheduler.Classes
                         {
                             processorsWaitTimes.Add(p.Name, first.Duration);
                         }
+                        processWaitTime += first.Duration;
                     }
                 }
                 else//Nothing to put on CPU, so it's waiting
                 {
                     cpuWaiting = true;
                 }
-
                 //If any IO bursts are available, sort them and add the shortest one to our lists
                 bool ioWaiting = false;
                 if (availableIOs.Count > 0)
@@ -173,7 +174,7 @@ namespace Scheduler.Classes
                 
                 if (cpuWaiting)
                 {
-                    waitingTime += ioTime - cpuTime; //Add to total wait time of the CPU
+                    cpuWaitTime += ioTime > cpuTime ? (ioTime - cpuTime) : 0;
                     cpuTime = ioTime;//Because IO moved time forward and we added wait time to CPU
                 }else if (ioWaiting)
                 {
@@ -182,30 +183,33 @@ namespace Scheduler.Classes
                 }
 
                 //Set current time to minimum of cpu and io time
-                currentTime = cpuTime > ioTime ? ioTime : cpuTime; 
+                currentTime = cpuTime > ioTime ? ioTime : cpuTime;
+
+                //Delete any processes queued up to be deleted
+                if (processesToDelete.Count > 0)
+                {
+                    foreach (KodyProcessItem pi in processesToDelete)
+                    {
+                        queue.Remove(pi);
+                    }
+                }   
             }
 
-
-            /*
-             CALCULATE STATS AND RETURN 'EM
-            */
-
-            //Grab processes wait times from my process data and put it into the dictionary....Kim already had this method setup, so bleh
             return new SchedulerResult
             {
                 CpuProcesses = cpuProcesses,
                 IoProcesses = ioProcesses,
-                SchedulerStats = calculateStats(processes.Count, waitingTime, processorsWaitTimes)
+                SchedulerStats = calculateStats(processes.Count, cpuWaitTime, processWaitTime,  currentTime, processorsWaitTimes)
             };
         }
 
-        private SchedulerStats calculateStats(int numProcesses, int waitingTime, Dictionary<string, int> processorsWaitTimes)
+        private SchedulerStats calculateStats(int numProcesses, int cpuWaitingTime, int processWaitTime, int currentTime, Dictionary<string, int> processorsWaitTimes)
         {
             return new SchedulerStats
             {
                 AverageTurnAroundTime = 0.0,//((double)turnAroundTime) / numProcesses, each process end - start time
-                CpuUtilization =0.0,//((double)currentTime - waitingTime) / currentTime,
-                AverageWaitingTime = ((double)waitingTime) / numProcesses,
+                CpuUtilization = ((double)currentTime - cpuWaitingTime) / currentTime,
+                AverageWaitingTime = ((double)processWaitTime) / numProcesses,
                 ProcessWaitTimes = processorsWaitTimes
             };
         }
