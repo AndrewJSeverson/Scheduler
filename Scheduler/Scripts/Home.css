@@ -10,6 +10,7 @@
     border:2px solid;
     border-radius:25px;
     padding-right:10px;
+    width: 5000px;
 }
 .P1
 {
@@ -17,6 +18,7 @@
     height:25px;
     background-color:lightblue;
     text-align: center;
+    height: 50px;
 }
 
 .P2
@@ -25,6 +27,7 @@
     height:25px;
     background-color:red;
     text-align: center;
+    height: 50px;
 }
 
 .P3
@@ -33,6 +36,7 @@
     height:25px;
     background-color:green;
     text-align: center;
+    height: 50px;
 }
 
 .P4
@@ -41,6 +45,7 @@
     height:25px;
     background-color:yellow;
     text-align: center;
+    height: 50px;
 }
 
 .P5
@@ -49,6 +54,7 @@
     height:25px;
     background-color:purple;
     text-align: center;
+    height: 50px;
 }
 
 .P6
@@ -57,6 +63,7 @@
     height:25px;
     background-color:orange;
     text-align: center;
+    height: 50px;
 }
 
 .P7
@@ -65,6 +72,7 @@
     height:25px;
     background-color:mediumspringgreen;
     text-align: center;
+    height: 50px;
 }
 
 .Break{
@@ -72,6 +80,7 @@
     height:25px;
     background-color:grey;
     text-align: center;
+    height: 50px;
 }
 
 #FeedbackOpenClose, #RROpenClose, #STROpenClose, #SPNOpenClose, #FCFSOpenClose

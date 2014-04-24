@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 using Scheduler.Classes;
 using Scheduler.Models;
@@ -25,14 +23,13 @@ namespace Scheduler.Controllers
             HomeModel model = new HomeModel
                 {
                 NumProcess = numProcess,
-                ProcessItems = processItems,
-                Feedback = f.Run(processItems),
-                //SPN = s.Run(processItems),
+                ProcessItems = (List<ProcessItem>) Helper.DeepCopy(processItems),
+                Feedback = f.Run((List<ProcessItem>)Helper.DeepCopy(processItems)),
+                SPN = s.Run((List<ProcessItem>)Helper.DeepCopy(processItems)),
                 //SRT = p.Run(processItems)
                 //RR = rr.Run(processItems)
-                FCFS = fcfs.Run(processItems)
+                //FCFS = fcfs.Run(processItems)
                 };
-            
             return View(model);
         }
         public static List<ProcessItem> getProcessData(int numProc)
@@ -59,5 +56,6 @@ namespace Scheduler.Controllers
             }
             return temp;
         }
+
     }
 }

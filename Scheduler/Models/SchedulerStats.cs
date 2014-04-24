@@ -11,5 +11,6 @@ namespace Scheduler.Models
         public double AverageTurnAroundTime { get; set; }
 
         public Dictionary<string, int> ProcessWaitTimes { get; set; }
+        public Dictionary<string, double> ProcessTurnAroundTimes { get; set; }
     }
 }
