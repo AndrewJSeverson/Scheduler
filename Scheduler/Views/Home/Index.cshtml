@@ -520,11 +520,11 @@
             </tr>
             <tr>
                 <td>Average Waiting Time</td>
-                <td>@Model.Feedback.SchedulerStats.AverageWaitingTime</td>
+                <td>@(Math.Round(Model.Feedback.SchedulerStats.AverageWaitingTime,2))</td>
             </tr>
             <tr>
                 <td>Average Turnaround Time</td>
-                <td>@Model.Feedback.SchedulerStats.AverageTurnAroundTime</td>
+                <td>@(Math.Round(Model.Feedback.SchedulerStats.AverageTurnAroundTime,2))</td>
             </tr>
         </tbody>
     </table>
