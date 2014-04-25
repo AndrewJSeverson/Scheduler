@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Scheduler.Models;
 
@@ -134,7 +135,7 @@ namespace Scheduler.Classes
             return new SchedulerStats
                 {
                     AverageTurnAroundTime = ((double)turnAroundTime) / numProcesses,
-                    CpuUtilization = ((double)currentTime - cpuDownTime) / currentTime, 
+                    CpuUtilization = ((double)currentTime - cpuDownTime) / currentTime,
                     AverageWaitingTime = ((double)waitingTime) / numProcesses,
                     ProcessWaitTimes = processorsWaitTimes
                 };
