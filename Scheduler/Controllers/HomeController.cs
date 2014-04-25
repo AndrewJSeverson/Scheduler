@@ -30,8 +30,8 @@ namespace Scheduler.Controllers
                 Feedback = f.Run(Helper.Clone(processItems)),
                 SPN = s.Run(Helper.Clone(processItems)),
                 //SRT = p.Run(processItems)
-                //RR = rr.Run(processItems)
-                //FCFS = fcfs.Run(processItems)
+                RR = rr.Run(processItems),
+                FCFS = fcfs.Run(processItems)
                 };
             return View(model);
         }
