@@ -55,7 +55,7 @@ namespace Scheduler.Classes
             Process currentioproc = null;
             int clock = -1;
 
-            while (ioready.Count != 0 || cpuready.Count != 0 || entrylist.Count != 0)
+            while (ioready.Count != 0 || cpuready.Count != 0 || entrylist.Count != 0 || currentioproc != null || currentcpuproc != null)
             {
                 clock++;
                 bool preempt = false;
@@ -74,8 +74,8 @@ namespace Scheduler.Classes
                 if (currentcpuproc != null && currentcpuproc.Duration + currentcpuproc.StartTime == clock)
                 {
                     preempt = true;
-                    burstindex[currentcpuproc.ProcessIndex]++;
                     var tempint = currentcpuproc.ProcessIndex;
+                    burstindex[tempint]++;
                     if (burstindex[tempint] < processes[tempint].BurstArray.Count())
                         ioready.Add(
                             new Process
@@ -96,14 +96,15 @@ namespace Scheduler.Classes
                 if (currentioproc != null && currentioproc.Duration + currentioproc.StartTime == clock)
                 {
                     preempt = true;
-                    burstindex[currentioproc.ProcessIndex]++;
                     var tempint = currentioproc.ProcessIndex;
+                    burstindex[tempint]++;
                     cpuready.Add(
                         new Process
                         {
                             Name = currentioproc.Name,
                             StartTime = clock,
-                            Duration = processes[tempint].BurstArray[burstindex[tempint]]
+                            Duration = processes[tempint].BurstArray[burstindex[tempint]],
+                            ProcessIndex = currentioproc.ProcessIndex
                         }
                     );
                     ioproc.Add(currentioproc);
@@ -124,19 +125,27 @@ namespace Scheduler.Classes
                                 ProcessIndex = currentcpuproc.ProcessIndex
                             }
                         );
-                        cpuproc.Add(
-                            new Process
-                            {
-                                Name = currentcpuproc.Name,
-                                StartTime = currentcpuproc.StartTime,
-                                Duration = clock - currentcpuproc.StartTime,
-                                ProcessIndex = currentcpuproc.ProcessIndex
-                            }
-                        );
-                        currentcpuproc = null;
+                        cpuready.Sort((x, y) => x.Duration.CompareTo(y.Duration));
+                        if (cpuready[0].ProcessIndex != currentcpuproc.ProcessIndex)
+                        {
+                            cpuproc.Add(
+                                new Process
+                                {
+                                    Name = currentcpuproc.Name,
+                                    StartTime = currentcpuproc.StartTime,
+                                    Duration = clock - currentcpuproc.StartTime,
+                                    ProcessIndex = currentcpuproc.ProcessIndex
+                                }
+                            );
+                            currentcpuproc = cpuready[0];
+                            cpuready.RemoveAt(0);
+                        }
+                        else
+                        {
+                            cpuready.RemoveAt(0);
+                        }
                     }
-                    
-                    if (cpuready.Count != 0)
+                    else if (cpuready.Count != 0)
                     {
                         cpuready.Sort((x, y) => x.Duration.CompareTo(y.Duration));
                         currentcpuproc = cpuready[0];
@@ -153,6 +162,7 @@ namespace Scheduler.Classes
 
                 if (currentioproc == null && ioready.Count != 0){
                     currentioproc = ioready[0];
+                    currentioproc.StartTime = clock;
                     ioready.RemoveAt(0);
                 }
             }
