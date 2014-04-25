@@ -13,5 +13,8 @@ namespace Scheduler.Classes
 
         //Statistics about the CPU using a given scheduling method
         public SchedulerStats SchedulerStats { get; set; }
+
+        // Time quantum used in Round Robin scheduling.
+        public int? Quantum { get; set; }
     }
 }
