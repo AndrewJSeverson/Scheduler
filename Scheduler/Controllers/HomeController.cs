@@ -29,9 +29,9 @@ namespace Scheduler.Controllers
                 ProcessItems = Helper.Clone(processItems),
                 Feedback = f.Run(Helper.Clone(processItems)),
                 SPN = s.Run(Helper.Clone(processItems)),
-                SRT = p.Run(processItems)
-                //RR = rr.Run(processItems)
-                //FCFS = fcfs.Run(processItems)
+                //SRT = p.Run(processItems)
+                RR = rr.Run(processItems),
+                FCFS = fcfs.Run(processItems)
                 };
             return View(model);
         }

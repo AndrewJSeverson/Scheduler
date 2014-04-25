@@ -128,16 +128,52 @@ namespace Scheduler.Classes
             int cpuWait = 0;
             int ioWait = 0;
 
-            // While there is still work to be done in BOTH queues
-            while (availableCPUs.Count > 0 && availableIOs.Count > 0)
+            currentTime = 0;
+            Process CurrentCPUExec = null;
+            Process CurrentIOExec = null;
+            // a different approach.
+            while (availableCPUs.Count > 0 || availableIOs.Count > 0)
             {
-                // Grab the first two processes off the list.
-                Process CPUProc = availableCPUs.First();
+                Process CPUProc;
+                try
+                {
+                    if (CurrentIOExec != null)
+                    {
+                        CPUProc = availableCPUs.First(x => x.ProcessIndex != CurrentIOExec.ProcessIndex);
+                    }
+                    else
+                    {
+                        CPUProc = availableCPUs.First();
+                    }
+                }
+                catch (InvalidOperationException e)
+                {
+                    cpuWaiting = true;
+                    CPUProc = null;
+                }
+
                 Process IOProc;
                 try
                 {
-                    IOProc = availableIOs.First(x => x.ProcessIndex != CPUProc.ProcessIndex);
-                        // Grab the first IO Process that is not the same as the CPU process
+                    if (CurrentCPUExec != null && CPUProc != null)
+                    {
+                        IOProc =
+                            availableIOs.First(
+                                x =>
+                                x.ProcessIndex != CPUProc.ProcessIndex && x.ProcessIndex != CurrentCPUExec.ProcessIndex);
+                    }
+                    else if (CurrentCPUExec == null && CPUProc != null)
+                    {
+                        IOProc = availableIOs.First(x => x.ProcessIndex != CPUProc.ProcessIndex);
+                    }
+                    else if (CurrentCPUExec != null & CPUProc == null)
+                    {
+                        IOProc = availableIOs.First(x => x.ProcessIndex != CurrentCPUExec.ProcessIndex);
+                    }
+                    else
+                    {
+                        IOProc = availableIOs.First();
+                    }
                 }
                 catch (InvalidOperationException e)
                 {
@@ -147,81 +183,124 @@ namespace Scheduler.Classes
                     IOProc = null;
                 }
 
+                // If there is no work to be done for the IO
+                if (IOProc == null)
+                {
+                    if (CurrentIOExec != null)
+                    {
+                        if (CurrentIOExec.StartTime + CurrentIOExec.Duration == currentTime)
+                        {
+                            CurrentIOExec = null;
+                        }
+                    }
+                }
 
-                // Process CPU if and only if the process has already arrived. 
-                if (processes[CPUProc.ProcessIndex].ArrivalTime >= arrivalTime && cpuTime == currentTime)
+                // If there i sno work to be done for the CPU
+                if (CPUProc == null)
                 {
-                    cpuTime = cpuTime + CPUProc.Duration;
-                    cpuProcesses.Add(CPUProc);
-                    availableCPUs.RemoveAt(availableCPUs.IndexOf(CPUProc));
+                    if (CurrentCPUExec != null)
+                    {
+                        if (CurrentCPUExec.StartTime + CurrentCPUExec.Duration == currentTime)
+                        {
+                            CurrentCPUExec = null;
+                        }
+                    }
                 }
-                else
-                {
-                    cpuWaiting = true;
-                }
+               
 
-                // Process IO if and only if the process has already arrived. 
-                if (!ioWaiting && IOProc != null && processes[IOProc.ProcessIndex].ArrivalTime >= arrivalTime && ioTime == currentTime)
-                {
-                    ioTime = ioTime + IOProc.Duration;
-                    ioProcesses.Add(IOProc);
-                    availableIOs.RemoveAt(availableIOs.IndexOf(IOProc));
-                }
-                else
+                // If both are waiting, continue.
+                if (CPUProc != null && IOProc != null && processes[CPUProc.ProcessIndex].ArrivalTime > currentTime &&
+                    processes[IOProc.ProcessIndex].ArrivalTime > currentTime)
                 {
                     ioWaiting = true;
+                    cpuWaiting = true;
+                    currentTime++;
+                    foreach (ProcessItem x in processes.Where(x => x.ArrivalTime <= arrivalTime))
+                    {
+                        waitTimes[processes.IndexOf(x)] = waitTimes[processes.IndexOf(x)] + 1;
+                    }
+                    continue;
                 }
 
 
-
-                foreach (ProcessItem x in processes.Where(x => x.ArrivalTime <= arrivalTime))
+                // Nothing is currently being processed, but something CAN begin execution
+                if (CPUProc != null && CurrentCPUExec == null && processes[CPUProc.ProcessIndex].ArrivalTime <= currentTime)
                 {
-                    waitTimes[processes.IndexOf(x)] += Math.Min(ioTime, cpuTime) - currentTime;
+                    // Set the currently executing process
+                    CurrentCPUExec = CPUProc;
+                    // Set the start time of the currently executing process
+                    CurrentCPUExec.StartTime = currentTime;
+                    // Add the process to the cpuProcesses queue
+                    cpuProcesses.Add(CurrentCPUExec);
+                    // Remove it from the available queue
+                    availableCPUs.RemoveAt(availableCPUs.IndexOf(CurrentCPUExec));
+                }
+                // Meaning we have a proces currently executing, and we have one ready for execution as well.
+                else if (CPUProc != null && CurrentCPUExec != null && processes[CPUProc.ProcessIndex].ArrivalTime <= currentTime)
+                {
+                    // meaning our current process just finished execution
+                    if (CurrentCPUExec.StartTime + CurrentCPUExec.Duration == currentTime)
+                    {
+                        CurrentCPUExec = null;
+                        CurrentCPUExec = CPUProc;
+                        CurrentCPUExec.StartTime = currentTime;
+                        cpuProcesses.Add(CurrentCPUExec);
+                        availableCPUs.RemoveAt(availableCPUs.IndexOf(CurrentCPUExec));
+                    }
                 }
 
-                // Advance the current time to whatever the shortest process is.
-                if (!ioWaiting && !cpuWaiting)
+                // Nothing is currently being processed, but something CAN begin execution
+                if (IOProc != null && CurrentIOExec == null && processes[IOProc.ProcessIndex].ArrivalTime <= currentTime)
                 {
-                    currentTime = Math.Min(cpuTime, ioTime);
+                    // SEt the currently executing process
+                    CurrentIOExec = IOProc;
+                    // Set the start time of the currently executing process
+                    CurrentIOExec.StartTime = currentTime;
+                    // Add the process to the ioProcesses queue
+                    ioProcesses.Add(CurrentIOExec);
+                    // Remove it from the available queue
+                    availableIOs.RemoveAt(availableIOs.IndexOf(CurrentIOExec));
                 }
-                else if (ioWaiting && !cpuWaiting)
+                // meaning we have a process currently executing, and we have one ready for execution as well.
+                else if (IOProc != null && CurrentIOExec != null && processes[IOProc.ProcessIndex].ArrivalTime <= currentTime)
                 {
-                    ioWait += cpuTime - currentTime;
-                    currentTime = cpuTime;
-                } else if (cpuWaiting && !ioWaiting)
-                {
-                    cpuWait += ioTime - currentTime;
-                    currentTime = ioTime;
+                    // meaning our current process just finished execution
+                    if (CurrentIOExec.StartTime + CurrentIOExec.Duration == currentTime)
+                    {
+                        Process CopyOfCurrent = CurrentIOExec;
+                        CurrentIOExec = null;
+                        CurrentIOExec = IOProc;
+                        CurrentIOExec.StartTime = currentTime;
+                        ioProcesses.Add(CurrentIOExec);
+                        availableIOs.RemoveAt(availableIOs.IndexOf(CurrentIOExec));
+                    }
                 }
-                else
-                {
-                    // This is a weird case that I'm not going to handle, because
-                    // the CPU and IO should never be waiting at the same time.
-                }
+                currentTime++;
             }
 
-            // If there is still processor work to do, do it.
-            while (availableCPUs.Count > 0)
-            {
-                Process CPUProc = availableCPUs.First();
-                cpuTime = cpuTime + CPUProc.Duration;
-                cpuProcesses.Add(CPUProc);
-                availableCPUs.RemoveAt(0);
 
-                ioWait = cpuTime - currentTime;
-                currentTime = ioTime = cpuTime;
-            }
+            //// If there is still processor work to do, do it.
+            //while (availableCPUs.Count > 0)
+            //{
+            //    Process CPUProc = availableCPUs.First();
+            //    cpuTime = cpuTime + CPUProc.Duration;
+            //    cpuProcesses.Add(CPUProc);
+            //    availableCPUs.RemoveAt(0);
 
-            while (availableIOs.Count > 0)
-            {
-                Process IOProc = availableIOs.First();
-                ioTime = ioTime + IOProc.Duration;
-                ioProcesses.Add(IOProc);
-                availableIOs.RemoveAt(0);
+            //    ioWait = cpuTime - currentTime;
+            //    currentTime = ioTime = cpuTime;
+            //}
 
-                cpuWait = ioTime - currentTime;
-                currentTime = cpuTime = ioTime;
-            }
+            //while (availableIOs.Count > 0)
+            //{
+            //    Process IOProc = availableIOs.First();
+            //    ioTime = ioTime + IOProc.Duration;
+            //    ioProcesses.Add(IOProc);
+            //    availableIOs.RemoveAt(0);
+
+            //    cpuWait = ioTime - currentTime;
+            //    currentTime = cpuTime = ioTime;
+            //}
 
             /*
              CALCULATE STATS AND RETURN 'EM
