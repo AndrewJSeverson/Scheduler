@@ -20,9 +20,12 @@ namespace Scheduler.Classes
 
             //arrays to keep track of wait and turnaround times
             var turnarounds = new int[processes.Count];
-            for (int i = 0; i < processes.Count; i++) turnarounds[i] = 0;
             var waits = new int[processes.Count];
-            for (int i = 0; i < processes.Count; i++) waits[i] = 0;
+            for (int i = 0; i < processes.Count; i++){
+                turnarounds[i] = 0;
+                waits[i] = 0;
+            }
+            var cpuwait = 0;
 
            //array to track which burst each process is working on
             var burstindex = new int[processes.Count];
@@ -50,16 +53,17 @@ namespace Scheduler.Classes
             //setup for loop
             Process currentcpuproc = null;
             Process currentioproc = null;
-            entrylist.RemoveAt(0);
-            int clock = currentcpuproc.StartTime;
+            int clock = -1;
 
             while (ioready.Count != 0 || cpuready.Count != 0 || entrylist.Count != 0)
             {
                 clock++;
                 bool preempt = false;
+                if (currentcpuproc == null || currentioproc == null)
+                    preempt = true;
 
                 //if a process arrives fresh to the cpu
-                if (entrylist[0].StartTime == clock)
+                while (entrylist.Count != 0 && entrylist[0].StartTime == clock)
                 {
                     preempt = true;
                     cpuready.Add(entrylist[0]);
@@ -67,23 +71,27 @@ namespace Scheduler.Classes
                 }
 
                 //if the current cpu process ends
-                if (currentcpuproc.Duration + currentcpuproc.StartTime == clock)
+                if (currentcpuproc != null && currentcpuproc.Duration + currentcpuproc.StartTime == clock)
                 {
                     preempt = true;
                     burstindex[currentcpuproc.ProcessIndex]++;
                     var tempint = currentcpuproc.ProcessIndex;
-                    if(burstindex[tempint] < processes[tempint].BurstArray.Count())
+                    if (burstindex[tempint] < processes[tempint].BurstArray.Count())
                         ioready.Add(
-                            new Process{
+                            new Process
+                            {
                                 Name = currentcpuproc.Name,
                                 StartTime = clock,
                                 Duration = processes[tempint].BurstArray[burstindex[tempint]],
                                 ProcessIndex = currentcpuproc.ProcessIndex
                             }
                         );
+                    else
+                        turnarounds[currentcpuproc.ProcessIndex] = clock - processes[currentcpuproc.ProcessIndex].ArrivalTime;
                     cpuproc.Add(currentcpuproc);
                     currentcpuproc = null;
                 }
+
                 //if the current io process ends
                 if (currentioproc != null && currentioproc.Duration + currentioproc.StartTime == clock)
                 {
@@ -91,7 +99,8 @@ namespace Scheduler.Classes
                     burstindex[currentioproc.ProcessIndex]++;
                     var tempint = currentioproc.ProcessIndex;
                     cpuready.Add(
-                        new Process{
+                        new Process
+                        {
                             Name = currentioproc.Name,
                             StartTime = clock,
                             Duration = processes[tempint].BurstArray[burstindex[tempint]]
@@ -104,17 +113,59 @@ namespace Scheduler.Classes
                 //handling preemptions and stuff
                 if (preempt)
                 {
-                    //TODO
+                    if (currentcpuproc != null)
+                    {
+                        cpuready.Add(
+                            new Process
+                            {
+                                Name = currentcpuproc.Name,
+                                Duration = currentcpuproc.Duration - (clock - currentcpuproc.StartTime),
+                                StartTime = clock,
+                                ProcessIndex = currentcpuproc.ProcessIndex
+                            }
+                        );
+                        cpuproc.Add(
+                            new Process
+                            {
+                                Name = currentcpuproc.Name,
+                                StartTime = currentcpuproc.StartTime,
+                                Duration = clock - currentcpuproc.StartTime,
+                                ProcessIndex = currentcpuproc.ProcessIndex
+                            }
+                        );
+                        currentcpuproc = null;
+                    }
+                    
+                    if (cpuready.Count != 0)
+                    {
+                        cpuready.Sort((x, y) => x.Duration.CompareTo(y.Duration));
+                        currentcpuproc = cpuready[0];
+                        if (currentcpuproc.StartTime < clock)
+                        {
+                            waits[currentcpuproc.ProcessIndex] += clock - currentcpuproc.StartTime;
+                            currentcpuproc.StartTime = clock;
+                        }
+                        cpuready.RemoveAt(0);
+                    }
+                    else
+                        cpuwait++;
                 }
 
-                if (currentioproc == null){
+                if (currentioproc == null && ioready.Count != 0){
                     currentioproc = ioready[0];
                     ioready.RemoveAt(0);
                 }
             }
 
+            var procwait = new Dictionary<string,int>();
+            var turnaround = new Dictionary<string,double>();
+            for (int i = 0; i < processes.Count; i++){
+                procwait.Add(processes[i].Name,waits[i]);
+                turnaround.Add(processes[i].Name,(double)turnarounds[i]);
+            }
+
             return new SchedulerResult{
-                SchedulerStats = null, //TODO
+                SchedulerStats = calculateStats(processes.Count,cpuwait,waits.Sum(),clock,turnarounds.Sum(),procwait,turnaround),
                 CpuProcesses = cpuproc,
                 IoProcesses = ioproc
             };
