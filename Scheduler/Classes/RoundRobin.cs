@@ -9,15 +9,7 @@ namespace Scheduler.Classes
     public class RoundRobin : Scheduler
     {
         private List<ProcessItem> processItems;
-
-        //Hard coded queue times based on the assignment description
-        private List<int> QueueTimes = new List<int>
-            {
-                1,
-                2,
-                4
-            };
-
+        
         //The four queues this implementation of feedback requires
         private List<KimProcessItem> queue = new List<KimProcessItem>();
 
