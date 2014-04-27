@@ -22,7 +22,32 @@ namespace Scheduler.Controllers
             RoundRobin rr = new RoundRobin();
             Preemptive p = new Preemptive();
             FCFS fcfs = new FCFS();
-            List<ProcessItem> processItems = getProcessData(numProcess);
+            List<ProcessItem> processItems = new List<ProcessItem>(); //= getProcessData(numProcess);
+
+            ProcessItem p1 = new ProcessItem
+            {
+                Name = "P1",
+                ArrivalTime = 0,
+                BurstArray = new[]{6,17,3,11,16,10,13}
+            };
+            ProcessItem p2 = new ProcessItem
+            {
+                Name = "P2",
+                ArrivalTime = 11,
+                BurstArray = new[] { 6,2,5,13,8 }
+            };
+            ProcessItem p3 = new ProcessItem
+            {
+                Name = "P3",
+                ArrivalTime = 5,
+                BurstArray = new[] { 16,6,13,5,4,9,2 }
+            };
+            processItems.Add(p1);
+            processItems.Add(p2);
+            processItems.Add(p3);
+
+
+
             HomeModel model = new HomeModel
                 {
                 NumProcess = numProcess,
